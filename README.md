@@ -6,11 +6,11 @@
 
 ## ✨ 핵심 기능 (Core Features)
 
-- **정밀 음성 인식 (STT):** OpenAI Whisper API를 사용하여 복잡한 포켓몬 이름도 정확하게 인식합니다.
+- **정밀 음성 인식 (STT):** Groq API를 사용하여 복잡한 포켓몬 이름도 정확하게 인식합니다.
 - **포켓몬 전용 엔진:** 1세대부터 9세대까지의 포켓몬 데이터를 기반으로 단어의 유효성을 즉시 검증합니다.
 - **지능형 끝말잇기 로직:** 한국어 특유의 두음법칙(예: '리' → '이')을 완벽하게 지원합니다.
-- **AI 페르소나 응답 (LLM):** GPT-4o-mini가 단순 단어 제시를 넘어, 포켓몬 마스터다운 위트 있는 대화를 생성합니다.
-- **실시간 음성 출력 (TTS):** OpenAI TTS를 통해 AI의 대답을 생생한 음성으로 출력합니다.
+- **AI 페르소나 응답 (LLM):** Google Gemini API가 단순 단어 제시를 넘어, 포켓몬 마스터다운 위트 있는 대화를 생성합니다.
+- **실시간 음성 출력 (TTS):** Web Speech API를 통해 AI의 대답을 브라우저 내장 음성으로 즉시 출력합니다.
 
 ---
 
@@ -18,9 +18,10 @@
 
 - **Frontend:** React (Vite), Tailwind CSS
 - **Audio Interface:** Web MediaRecorder API
-- **AI Engine:** - **Whisper API** (Voice to Text)
-  - **GPT-4o-mini** (Game Logic & Persona)
-  - **OpenAI TTS** (Text to Voice)
+- **AI Engine:**
+  - **Groq API** (Voice to Text - Whisper 모델)
+  - **Google Gemini API** (Game Logic & Persona)
+  - **Web Speech API** (Text to Voice - 브라우저 내장)
 - **Deployment:** Vercel (HTTPS 환경 필수)
 
 ---
@@ -40,4 +41,5 @@
 ### 1. 환경 변수 설정
 프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 입력합니다.
 ```env
-VITE_OPENAI_API_KEY=your_openai_api_key_here
+VITE_GROQ_API_KEY=your_groq_api_key_here
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
