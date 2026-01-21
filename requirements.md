@@ -20,6 +20,10 @@
 - **LLM (대화/힌트 가이드)**: Google Gemini API (Gemini 2.0 Flash)
 - **TTS (음성 출력)**: Web Speech API (SpeechSynthesis)
 - **Data**: 로컬 `pokemonData.json`
+  - 확장된 데이터 구조 (타입, 능력치, 이미지, 설명 포함)
+  - 현재: 1세대 10개 샘플 데이터
+  - 데이터 수집: `scripts/fetchGen1Pokemon.js` (PokeAPI 활용)
+  - 추후 도감 기능 확장 가능
 
 ## 4. 상세 규칙 및 기능
 - **두음법칙**: '리' -> '이' 등 한국어 표준 두음법칙 허용.

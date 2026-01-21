@@ -1,14 +1,17 @@
 # 🚀 개발 로드맵
 
 ## Phase 0: 프로젝트 초기화
-- [ ] **Step 1**: Vite + React + Tailwind CSS 프로젝트 생성
-- [ ] **Step 2**: 기본 폴더 구조 설정 (components, utils, data, hooks 등)
-- [ ] **Step 3**: Git 저장소 초기화 및 .gitignore 설정
+- [x] **Step 1**: Vite + React + Tailwind CSS 프로젝트 생성
+- [x] **Step 2**: 기본 폴더 구조 설정 (components, utils, data, hooks 등)
+- [x] **Step 3**: Git 저장소 초기화 및 .gitignore 설정
 
 ## Phase 1: 데이터 구축 및 기본 UI
-- [ ] **Step 4**: 1~9세대 한국어 포켓몬 이름 데이터 수집 및 `pokemonData.json` 구축
+- [x] **Step 4**: 1~9세대 한국어 포켓몬 이름 데이터 수집 및 `pokemonData.json` 구축
   - 포켓몬 이름, 세대 정보 포함
-  - JSON 형식: `[{ "id": 1, "name": "이상해씨", "generation": 1 }, ...]`
+  - JSON 형식: 확장된 구조로 구현 (타입, 능력치, 이미지, 설명 등)
+  - 1세대 10개 샘플 데이터 구축 완료
+  - 데이터 수집 스크립트 (`scripts/fetchGen1Pokemon.js`) 추가
+  - 추후 도감 기능 확장 가능한 구조로 설계
 - [ ] **Step 5**: 포켓몬 도감 컨셉의 기본 레이아웃 구조 및 테마 색상(Red) 적용
 - [ ] **Step 6**: 텍스트 입력 UI 컴포넌트 (입력창, 제출 버튼)
 - [ ] **Step 7**: 대화 히스토리 UI (사용자/AI 말풍선, 스크롤)
