@@ -1,12 +1,12 @@
 # 🚀 개발 로드맵
 
 ## Phase 0: 프로젝트 초기화
-- [x] **Step 1**: Vite + React + Tailwind CSS 프로젝트 생성
-- [x] **Step 2**: 기본 폴더 구조 설정 (components, utils, data, hooks 등)
-- [x] **Step 3**: Git 저장소 초기화 및 .gitignore 설정
+- ✅ **Step 1**: Vite + React + Tailwind CSS 프로젝트 생성
+- ✅ **Step 2**: 기본 폴더 구조 설정 (components, utils, data, hooks 등)
+- ✅ **Step 3**: Git 저장소 초기화 및 .gitignore 설정
 
 ## Phase 1: 데이터 구축 및 기본 UI
-- [x] **Step 4**: 1~9세대 한국어 포켓몬 이름 데이터 수집 및 `pokemonData.json` 구축
+- ✅ **Step 4**: 1~9세대 한국어 포켓몬 이름 데이터 수집 및 `pokemonData.json` 구축
   - 포켓몬 이름, 세대 정보 포함
   - JSON 형식: 확장된 구조로 구현 (타입, 능력치, 이미지, 설명 등)
   - 1세대 10개 샘플 데이터 구축 완료
