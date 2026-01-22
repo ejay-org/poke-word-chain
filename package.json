@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "crawl": "node scripts/crawl-pokemon.js",
+    "crawl:force": "node scripts/crawl-pokemon.js --force",
+    "crawl:validate": "node scripts/validate-data.js"
   },
   "dependencies": {
     "react": "^18.3.1",
