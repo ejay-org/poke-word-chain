@@ -5,8 +5,22 @@
 ## 개요
 
 - **데이터 소스**: [PokeAPI](https://pokeapi.co/)
-- **수집 대상**: 1~9세대 포켓몬 1,025마리의 한국어 이름
+- **수집 대상**: 1~9세대 포켓몬 1,025마리
 - **출력 형식**: JSON 파일 (`src/data/pokemonData.json`)
+
+## 수집 데이터 필드
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `id` | number | 포켓몬 ID (전국도감 번호) |
+| `name` | string | 한국어 이름 |
+| `nameEn` | string | 영문 이름 |
+| `generation` | number | 세대 (1-9) |
+| `types` | string[] | 타입 (한국어) |
+| `typesEn` | string[] | 타입 (영문) |
+| `abilities` | string[] | 특성 (한국어, 숨겨진 특성 제외) |
+| `description` | string | 설명 (한국어) |
+| `imageUrl` | string | 대표 이미지 URL (official-artwork) |
 
 ## 사전 준비
 
@@ -93,6 +107,8 @@ npm run crawl:validate
 - 중복 ID 확인
 - 한국어 이름 유효성
 - 누락된 포켓몬 확인
+- 필드별 완성도 (영문 이름, 타입, 특성, 설명, 이미지 URL)
+- 타입 분포 통계
 
 ## 명령어 요약
 
@@ -108,13 +124,29 @@ npm run crawl:validate
 
 ```json
 [
-  { "id": 1, "name": "이상해씨", "generation": 1 },
-  { "id": 2, "name": "이상해풀", "generation": 1 },
-  { "id": 3, "name": "이상해꽃", "generation": 1 },
+  {
+    "id": 1,
+    "name": "이상해씨",
+    "nameEn": "Bulbasaur",
+    "generation": 1,
+    "types": ["풀", "독"],
+    "typesEn": ["grass", "poison"],
+    "abilities": ["심록"],
+    "description": "태어나서부터 등에 이상한 씨앗이 심어져 있어 몸과 함께 자란다.",
+    "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"
+  },
+  {
+    "id": 25,
+    "name": "피카츄",
+    "nameEn": "Pikachu",
+    "generation": 1,
+    "types": ["전기"],
+    "typesEn": ["electric"],
+    "abilities": ["정전기"],
+    "description": "꼬리를 세우고 주위의 상태를 살핀다. 이 포즈로 있을 때 꼬리에 번개가 떨어질 때가 있다.",
+    "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
+  },
   ...
-  { "id": 25, "name": "피카츄", "generation": 1 },
-  ...
-  { "id": 1025, "name": "복숭악동", "generation": 9 }
 ]
 ```
 
@@ -135,9 +167,11 @@ npm run crawl:validate
 
 ## 예상 소요 시간
 
-- 전체 수집 (1,025마리): 약 2-3분
-- API 요청 간격: 100ms (Rate Limiting 준수)
-- 50개마다 자동 저장 (중단 시 데이터 손실 최소화)
+- 전체 수집 (1,025마리): 약 10-15분
+  - 포켓몬당 약 2-3개의 API 요청 (species, pokemon, type/ability)
+  - 타입/특성 정보는 캐싱되어 재사용됨
+- API 요청 간격: 150ms (Rate Limiting 준수)
+- 25개마다 자동 저장 (중단 시 데이터 손실 최소화)
 
 ## 문제 해결
 
@@ -160,7 +194,7 @@ nvm use 18
 npm run crawl
 ```
 
-### 한국어 이름이 없는 포켓몬
+### 한국어 이름/설명이 없는 포켓몬
 
 PokeAPI에 한국어 번역이 누락된 포켓몬이 있을 수 있습니다.
 검증 스크립트에서 경고로 표시됩니다.
@@ -181,8 +215,32 @@ PokeAPI의 요청 제한에 걸린 경우입니다.
 
 ### 사용하는 API 엔드포인트
 
-```
-GET https://pokeapi.co/api/v2/pokemon-species/{id}/
-```
+| 엔드포인트 | 수집 데이터 |
+|-----------|------------|
+| `/pokemon-species/{id}/` | 이름 (한국어/영문), 설명 |
+| `/pokemon/{id}/` | 타입, 특성, 이미지 URL |
+| `/type/{id}/` | 타입 한국어 이름 (캐싱됨) |
+| `/ability/{id}/` | 특성 한국어 이름 (캐싱됨) |
 
-응답에서 `names` 배열의 `language.name === "ko"` 항목을 추출합니다.
+## 타입 목록 (한국어/영문)
+
+| 영문 | 한국어 |
+|------|--------|
+| normal | 노말 |
+| fire | 불꽃 |
+| water | 물 |
+| electric | 전기 |
+| grass | 풀 |
+| ice | 얼음 |
+| fighting | 격투 |
+| poison | 독 |
+| ground | 땅 |
+| flying | 비행 |
+| psychic | 에스퍼 |
+| bug | 벌레 |
+| rock | 바위 |
+| ghost | 고스트 |
+| dragon | 드래곤 |
+| dark | 악 |
+| steel | 강철 |
+| fairy | 페어리 |

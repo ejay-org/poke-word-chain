@@ -1,7 +1,18 @@
 #!/usr/bin/env node
 /**
  * Pokemon Data Crawler
- * PokeAPI를 사용하여 한국어 포켓몬 데이터를 수집합니다.
+ * PokeAPI를 사용하여 포켓몬 데이터를 수집합니다.
+ *
+ * 수집 데이터:
+ * - id: 포켓몬 ID
+ * - name: 한국어 이름
+ * - nameEn: 영문 이름
+ * - generation: 세대
+ * - types: 타입 (한국어)
+ * - typesEn: 타입 (영문)
+ * - abilities: 특성 (한국어)
+ * - description: 설명 (한국어)
+ * - imageUrl: 대표 이미지 URL
  *
  * 특징:
  * - 증분 수집: 기존 데이터 이후부터 재수집 가능
@@ -30,14 +41,14 @@ const CONFIG = {
   END_ID: 1025,
 
   // API 요청 간 대기 시간 (ms) - Rate limiting
-  REQUEST_DELAY: 100,
+  REQUEST_DELAY: 150,
 
   // 재시도 설정
   MAX_RETRIES: 3,
   RETRY_DELAY: 1000,
 
   // 배치 저장 간격 (몇 개마다 저장할지)
-  SAVE_INTERVAL: 50,
+  SAVE_INTERVAL: 25,
 };
 
 // 세대별 포켓몬 범위
@@ -52,6 +63,10 @@ const GENERATION_RANGES = [
   { gen: 8, start: 810, end: 905 },  // 가라르지방
   { gen: 9, start: 906, end: 1025 }, // 팔데아지방
 ];
+
+// 타입/특성 한국어 이름 캐시
+const typeCache = new Map();
+const abilityCache = new Map();
 
 /**
  * 포켓몬 ID로 세대 번호 반환
@@ -103,48 +118,152 @@ function saveData(data) {
 }
 
 /**
- * PokeAPI에서 포켓몬 종 정보 가져오기 (한국어 이름 포함)
+ * API 요청 with 재시도
  */
-async function fetchPokemonSpecies(id) {
-  const url = `${CONFIG.API_BASE_URL}/pokemon-species/${id}/`;
-
+async function fetchWithRetry(url, id) {
   for (let attempt = 1; attempt <= CONFIG.MAX_RETRIES; attempt++) {
     try {
       const response = await fetch(url);
 
       if (!response.ok) {
         if (response.status === 404) {
-          console.warn(`ID ${id}: 포켓몬을 찾을 수 없습니다 (404)`);
           return null;
         }
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const data = await response.json();
-
-      // 한국어 이름 찾기
-      const koreanName = data.names.find(n => n.language.name === 'ko');
-
-      if (!koreanName) {
-        console.warn(`ID ${id}: 한국어 이름을 찾을 수 없습니다`);
-        return null;
-      }
-
-      return {
-        id: data.id,
-        name: koreanName.name,
-        generation: getGeneration(data.id),
-      };
+      return await response.json();
     } catch (error) {
-      console.error(`ID ${id} 시도 ${attempt}/${CONFIG.MAX_RETRIES} 실패:`, error.message);
-
       if (attempt < CONFIG.MAX_RETRIES) {
         await sleep(CONFIG.RETRY_DELAY * attempt);
+      } else {
+        console.error(`\nID ${id} API 요청 실패 (${url}):`, error.message);
       }
     }
   }
-
   return null;
+}
+
+/**
+ * 타입 한국어 이름 가져오기 (캐싱)
+ */
+async function getTypeKoreanName(typeUrl) {
+  if (typeCache.has(typeUrl)) {
+    return typeCache.get(typeUrl);
+  }
+
+  const data = await fetchWithRetry(typeUrl, 'type');
+  if (data) {
+    const koreanName = data.names.find(n => n.language.name === 'ko');
+    const name = koreanName ? koreanName.name : data.name;
+    typeCache.set(typeUrl, name);
+    return name;
+  }
+  return null;
+}
+
+/**
+ * 특성 한국어 이름 가져오기 (캐싱)
+ */
+async function getAbilityKoreanName(abilityUrl) {
+  if (abilityCache.has(abilityUrl)) {
+    return abilityCache.get(abilityUrl);
+  }
+
+  const data = await fetchWithRetry(abilityUrl, 'ability');
+  if (data) {
+    const koreanName = data.names.find(n => n.language.name === 'ko');
+    const name = koreanName ? koreanName.name : data.name;
+    abilityCache.set(abilityUrl, name);
+    return name;
+  }
+  return null;
+}
+
+/**
+ * 포켓몬 데이터 수집 (species + pokemon 엔드포인트)
+ */
+async function fetchPokemonData(id) {
+  // 1. Pokemon Species 데이터 (이름, 설명)
+  const speciesUrl = `${CONFIG.API_BASE_URL}/pokemon-species/${id}/`;
+  const speciesData = await fetchWithRetry(speciesUrl, id);
+
+  if (!speciesData) {
+    console.warn(`\nID ${id}: pokemon-species 데이터를 가져올 수 없습니다`);
+    return null;
+  }
+
+  // 2. Pokemon 데이터 (타입, 특성, 이미지)
+  const pokemonUrl = `${CONFIG.API_BASE_URL}/pokemon/${id}/`;
+  const pokemonData = await fetchWithRetry(pokemonUrl, id);
+
+  if (!pokemonData) {
+    console.warn(`\nID ${id}: pokemon 데이터를 가져올 수 없습니다`);
+    return null;
+  }
+
+  // 한국어 이름
+  const koreanName = speciesData.names.find(n => n.language.name === 'ko');
+  if (!koreanName) {
+    console.warn(`\nID ${id}: 한국어 이름을 찾을 수 없습니다`);
+    return null;
+  }
+
+  // 영문 이름
+  const englishName = speciesData.names.find(n => n.language.name === 'en');
+
+  // 한국어 설명 (flavor text) - 가장 최신 버전 우선
+  const koreanFlavorTexts = speciesData.flavor_text_entries.filter(
+    f => f.language.name === 'ko'
+  );
+  let description = '';
+  if (koreanFlavorTexts.length > 0) {
+    // 줄바꿈 및 특수문자 정리
+    description = koreanFlavorTexts[koreanFlavorTexts.length - 1].flavor_text
+      .replace(/\n/g, ' ')
+      .replace(/\f/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // 타입 정보
+  const typesEn = pokemonData.types
+    .sort((a, b) => a.slot - b.slot)
+    .map(t => t.type.name);
+
+  // 타입 한국어 이름 가져오기
+  const typesKo = [];
+  for (const typeInfo of pokemonData.types.sort((a, b) => a.slot - b.slot)) {
+    const koName = await getTypeKoreanName(typeInfo.type.url);
+    if (koName) typesKo.push(koName);
+    await sleep(50); // Rate limiting for type API
+  }
+
+  // 특성 정보 (숨겨진 특성 제외, 일반 특성만)
+  const abilitiesKo = [];
+  for (const abilityInfo of pokemonData.abilities.filter(a => !a.is_hidden)) {
+    const koName = await getAbilityKoreanName(abilityInfo.ability.url);
+    if (koName) abilitiesKo.push(koName);
+    await sleep(50); // Rate limiting for ability API
+  }
+
+  // 대표 이미지 URL (official-artwork 우선)
+  const imageUrl =
+    pokemonData.sprites.other['official-artwork'].front_default ||
+    pokemonData.sprites.front_default ||
+    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+  return {
+    id: speciesData.id,
+    name: koreanName.name,
+    nameEn: englishName ? englishName.name : speciesData.name,
+    generation: getGeneration(speciesData.id),
+    types: typesKo,
+    typesEn: typesEn,
+    abilities: abilitiesKo,
+    description: description,
+    imageUrl: imageUrl,
+  };
 }
 
 /**
@@ -177,6 +296,9 @@ async function crawlPokemon(options = {}) {
   console.log(`수집 범위: #${startId} ~ #${endId}`);
   console.log(`출력 파일: ${CONFIG.OUTPUT_PATH}`);
   console.log('');
+  console.log('수집 데이터: id, name, nameEn, generation, types, typesEn,');
+  console.log('             abilities, description, imageUrl');
+  console.log('');
 
   // 기존 데이터 로드
   let existingData = forceRefresh ? [] : loadExistingData();
@@ -199,7 +321,7 @@ async function crawlPokemon(options = {}) {
 
   console.log(`새로 수집할 포켓몬: ${idsToFetch.length}개`);
   console.log('');
-  console.log('수집 시작...');
+  console.log('수집 시작... (타입/특성 정보 포함으로 시간이 다소 걸릴 수 있습니다)');
   console.log('');
 
   // 수집 시작
@@ -208,7 +330,7 @@ async function crawlPokemon(options = {}) {
   let failedIds = [];
 
   for (const id of idsToFetch) {
-    const pokemon = await fetchPokemonSpecies(id);
+    const pokemon = await fetchPokemonData(id);
 
     if (pokemon) {
       newData.push(pokemon);
@@ -256,6 +378,11 @@ async function crawlPokemon(options = {}) {
     console.log(`  ${range.gen}세대: ${count}/${total}개`);
   }
 
+  // 타입/특성 캐시 통계
+  console.log('');
+  console.log(`캐시된 타입: ${typeCache.size}개`);
+  console.log(`캐시된 특성: ${abilityCache.size}개`);
+
   return newData;
 }
 
@@ -286,6 +413,17 @@ Options:
   -e, --end <id>     종료 포켓몬 ID (기본값: 1025)
   -f, --force        기존 데이터 무시하고 전체 재수집
   -h, --help         도움말 표시
+
+수집 데이터:
+  - id          포켓몬 ID
+  - name        한국어 이름
+  - nameEn      영문 이름
+  - generation  세대
+  - types       타입 (한국어)
+  - typesEn     타입 (영문)
+  - abilities   특성 (한국어)
+  - description 설명 (한국어)
+  - imageUrl    대표 이미지 URL
 
 Examples:
   node crawl-pokemon.js                    # 전체 수집 (증분)

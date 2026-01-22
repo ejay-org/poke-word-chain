@@ -26,6 +26,13 @@ const GENERATION_RANGES = [
   { gen: 9, start: 906, end: 1025 },
 ];
 
+// 유효한 타입 목록 (영문)
+const VALID_TYPES_EN = [
+  'normal', 'fire', 'water', 'electric', 'grass', 'ice',
+  'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
+  'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy',
+];
+
 function validateData() {
   console.log('='.repeat(60));
   console.log('Pokemon Data Validator');
@@ -66,17 +73,75 @@ function validateData() {
   // 2. 각 항목 검증
   const seenIds = new Set();
   const seenNames = new Set();
+  const typeStats = new Map();
+  let missingFields = {
+    nameEn: 0,
+    types: 0,
+    typesEn: 0,
+    abilities: 0,
+    description: 0,
+    imageUrl: 0,
+  };
 
   for (const pokemon of data) {
-    // 필수 필드 확인
+    // 필수 필드 확인 - id
     if (typeof pokemon.id !== 'number') {
       errors.push(`ID가 숫자가 아닙니다: ${JSON.stringify(pokemon)}`);
+      continue;
     }
+
+    // 필수 필드 확인 - name (한국어)
     if (typeof pokemon.name !== 'string' || pokemon.name.trim() === '') {
-      errors.push(`ID ${pokemon.id}: 이름이 유효하지 않습니다`);
+      errors.push(`ID ${pokemon.id}: 한국어 이름이 유효하지 않습니다`);
     }
+
+    // 필수 필드 확인 - generation
     if (typeof pokemon.generation !== 'number' || pokemon.generation < 1 || pokemon.generation > 9) {
       errors.push(`ID ${pokemon.id}: 세대 정보가 유효하지 않습니다 (${pokemon.generation})`);
+    }
+
+    // 선택 필드 확인 - nameEn
+    if (!pokemon.nameEn || typeof pokemon.nameEn !== 'string') {
+      missingFields.nameEn++;
+    }
+
+    // 선택 필드 확인 - types
+    if (!Array.isArray(pokemon.types) || pokemon.types.length === 0) {
+      missingFields.types++;
+    } else {
+      // 타입 통계
+      for (const type of pokemon.types) {
+        typeStats.set(type, (typeStats.get(type) || 0) + 1);
+      }
+    }
+
+    // 선택 필드 확인 - typesEn
+    if (!Array.isArray(pokemon.typesEn) || pokemon.typesEn.length === 0) {
+      missingFields.typesEn++;
+    } else {
+      // 유효한 타입인지 확인
+      for (const type of pokemon.typesEn) {
+        if (!VALID_TYPES_EN.includes(type)) {
+          warnings.push(`ID ${pokemon.id}: 알 수 없는 타입 (${type})`);
+        }
+      }
+    }
+
+    // 선택 필드 확인 - abilities
+    if (!Array.isArray(pokemon.abilities) || pokemon.abilities.length === 0) {
+      missingFields.abilities++;
+    }
+
+    // 선택 필드 확인 - description
+    if (!pokemon.description || typeof pokemon.description !== 'string') {
+      missingFields.description++;
+    }
+
+    // 선택 필드 확인 - imageUrl
+    if (!pokemon.imageUrl || typeof pokemon.imageUrl !== 'string') {
+      missingFields.imageUrl++;
+    } else if (!pokemon.imageUrl.startsWith('http')) {
+      warnings.push(`ID ${pokemon.id}: 이미지 URL이 유효하지 않습니다`);
     }
 
     // 중복 ID 확인
@@ -92,7 +157,7 @@ function validateData() {
     seenNames.add(pokemon.name);
 
     // 한글 이름 확인
-    if (!/[가-힣]/.test(pokemon.name)) {
+    if (pokemon.name && !/[가-힣]/.test(pokemon.name)) {
       warnings.push(`ID ${pokemon.id}: 한글이 포함되지 않은 이름 (${pokemon.name})`);
     }
   }
@@ -134,7 +199,33 @@ function validateData() {
     }
   }
 
-  // 5. 결과 출력
+  // 5. 필드 완성도
+  console.log('');
+  console.log('필드 완성도:');
+  console.log('-'.repeat(40));
+  const totalCount = data.length;
+  console.log(`  id:          ${totalCount}/${totalCount} (100%)`);
+  console.log(`  name:        ${totalCount}/${totalCount} (100%)`);
+  console.log(`  nameEn:      ${totalCount - missingFields.nameEn}/${totalCount} (${Math.round((totalCount - missingFields.nameEn) / totalCount * 100)}%)`);
+  console.log(`  generation:  ${totalCount}/${totalCount} (100%)`);
+  console.log(`  types:       ${totalCount - missingFields.types}/${totalCount} (${Math.round((totalCount - missingFields.types) / totalCount * 100)}%)`);
+  console.log(`  typesEn:     ${totalCount - missingFields.typesEn}/${totalCount} (${Math.round((totalCount - missingFields.typesEn) / totalCount * 100)}%)`);
+  console.log(`  abilities:   ${totalCount - missingFields.abilities}/${totalCount} (${Math.round((totalCount - missingFields.abilities) / totalCount * 100)}%)`);
+  console.log(`  description: ${totalCount - missingFields.description}/${totalCount} (${Math.round((totalCount - missingFields.description) / totalCount * 100)}%)`);
+  console.log(`  imageUrl:    ${totalCount - missingFields.imageUrl}/${totalCount} (${Math.round((totalCount - missingFields.imageUrl) / totalCount * 100)}%)`);
+
+  // 6. 타입 분포
+  if (typeStats.size > 0) {
+    console.log('');
+    console.log('타입 분포 (한국어):');
+    console.log('-'.repeat(40));
+    const sortedTypes = [...typeStats.entries()].sort((a, b) => b[1] - a[1]);
+    for (const [type, count] of sortedTypes) {
+      console.log(`  ${type.padEnd(6)}: ${count}마리`);
+    }
+  }
+
+  // 7. 결과 출력
   console.log('');
   console.log('='.repeat(60));
   console.log('검증 결과');
