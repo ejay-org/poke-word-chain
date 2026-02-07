@@ -1,4 +1,7 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Send } from 'lucide-react';
 
 interface InputAreaProps {
   onSubmit: (text: string) => void;
@@ -23,28 +26,26 @@ export default function InputArea({ onSubmit, disabled = false }: InputAreaProps
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="border-t border-gray-200 bg-white px-4 py-3"
-    >
-      <div className="max-w-2xl mx-auto flex gap-2">
-        <input
-          type="text"
+    <form onSubmit={handleSubmit} className="border-t bg-background px-4 py-3">
+      <div className="mx-auto max-w-2xl flex gap-2">
+        <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="포켓몬 이름을 입력하세요..."
           disabled={disabled}
-          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-pokedex-red focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+          className="rounded-full"
           autoComplete="off"
         />
-        <button
+        <Button
           type="submit"
+          variant="pokedex"
+          size="icon"
           disabled={disabled || !input.trim()}
-          className="bg-pokedex-red hover:bg-pokedex-darkred text-white font-medium px-5 py-2.5 rounded-full text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="rounded-full shrink-0"
         >
-          전송
-        </button>
+          <Send className="size-4" />
+        </Button>
       </div>
     </form>
   );

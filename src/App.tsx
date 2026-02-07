@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import Header from './components/Header';
-import ChatHistory from './components/ChatHistory';
-import InputArea from './components/InputArea';
-import type { ChatMessage } from './types';
+import Header from '@/components/Header';
+import ChatHistory from '@/components/ChatHistory';
+import InputArea from '@/components/InputArea';
+import type { ChatMessage } from '@/types';
 
 function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -18,7 +18,6 @@ function App() {
     setMessages((prev) => [...prev, userMessage]);
 
     // TODO: Step 8+ 에서 게임 로직 및 AI 응답 연동
-    // 지금은 임시 에코 응답
     setTimeout(() => {
       const aiMessage: ChatMessage = {
         id: `ai-${Date.now()}`,
@@ -31,9 +30,9 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 flex flex-col max-w-2xl w-full mx-auto overflow-hidden">
+      <main className="flex-1 flex flex-col mx-auto w-full max-w-2xl overflow-hidden">
         <ChatHistory messages={messages} />
         <InputArea onSubmit={handleSubmit} />
       </main>
