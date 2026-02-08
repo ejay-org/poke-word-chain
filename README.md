@@ -23,7 +23,9 @@
   - **Google Gemini API** (Game Logic & Persona)
   - **Web Speech API** (Text to Voice - 브라우저 내장)
 - **Deployment:** Vercel (HTTPS 환경 필수)
-- **Local Logic:** `gameLogic.ts` - 단어 검증 및 끝말잇기 규칙 처리 (포켓몬 DB 기반)
+- **Local Logic:** `gameLogic.ts`
+  - 단어 검증: 중복, 포켓몬 DB 존재 여부 체크
+  - 두음법칙: 한국어 표준 발음 법칙 적용 (예: 리 -> 이, 녀 -> 여, 라 -> 나 등)
 
 ---
 
