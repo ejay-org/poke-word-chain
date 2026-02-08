@@ -30,3 +30,8 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+# Scripts
+scripts/
+!scripts/crawl-pokemon.js
+!scripts/validate-data.js
+!scripts/test-game-logic.ts

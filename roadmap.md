@@ -30,20 +30,22 @@
   - 힌트 버튼 UI 추가
 
 ## Phase 3: AI 페르소나 통합 (텍스트 기반)
-- [ ] **Step 13**: Google Gemini API 계정 생성 및 API 키 발급
-- [ ] **Step 14**: 환경 변수 설정 (`VITE_GEMINI_API_KEY`)
-- [ ] **Step 15**: Gemini API 연동 및 테스트
+- [x] **Step 13**: Google Gemini API 계정 생성 및 API 키 발급
+- [x] **Step 14**: 환경 변수 설정 (`VITE_GEMINI_API_KEY`)
+- [x] **Step 15**: Gemini API 연동 및 테스트
   - API 호출 및 응답 처리
   - 에러 핸들링 (네트워크 오류, API 한도 초과)
-- [ ] **Step 16**: 게임 로직 + LLM 통합 프롬프트 설계
+- [x] **Step 16**: 게임 로직 + LLM 통합 프롬프트 설계
   - 게임 규칙 및 현재 상태를 LLM에 전달
   - 포켓몬 마스터 페르소나 정의
   - 유효한 포켓몬 이름 선택 + 캐릭터 대사 생성
   - 응답 파싱 (단어 추출)
-- [ ] **Step 17**: 힌트 요청 전용 프롬프트 최적화
+- [ ] **Step 17**: 힌트 요청 전용 프롬프트 최적화 (보류 - 현재 로컬 로직으로 충분)
   - 사용자가 힌트 요청 시 자연스러운 힌트 제공
-- [ ] **Step 18**: 단위 테스트 작성 (단어 검증, 두음법칙, 게임 로직)
-- [ ] **Step 19**: 엣지 케이스 처리 및 버그 수정
+- [ ] **Step 18**: 단위 테스트 작성 (단어 검증, 두음법칙, 게임 로직) (진행 중)
+- [x] **Step 19**: 엣지 케이스 처리 및 버그 수정
+  - [x] Handle API Quota Exceeded error gracefully
+  - [x] Implement client-side Rate Limiting (RPM check)
 - [ ] **Step 20**: **텍스트 기반 게임 완전 동작 확인 (AI 페르소나 포함)**
 
 ## Phase 4: 음성 인식 기능 추가 (STT)
