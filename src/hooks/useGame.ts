@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { validateWord, getValidNextWord, getLastChar } from '@/utils/gameLogic';
+import { generateAiResponse } from '@/utils/gemini_api';
+import { GAME_CONFIG } from '@/constants';
 import type { ChatMessage } from '@/types';
 
 export type GameStatus = 'idle' | 'playing' | 'won' | 'lost';
@@ -53,8 +55,6 @@ export function useGame(): UseGameReturn {
         lastEndChar.current = '';
     }, []);
 
-
-
     const submitUserWord = useCallback((word: string) => {
         if (status !== 'playing' || currentTurn !== 'user') return;
 
@@ -62,14 +62,13 @@ export function useGame(): UseGameReturn {
         const validation = validateWord(word, lastEndChar.current, usedWords);
 
         if (!validation.isValid) {
-            // Show error as system message or just alert? 
-            // System message is better for chat interface.
+            // Show error as system message
             addMessage('system', `❌ ${validation.error}`);
             return;
         }
 
         // Valid User Move
-        const validWord = validation.pokemon!.name; // Normalized name if needed, but we use trimmed.
+        const validWord = validation.pokemon!.name;
         addMessage('user', validWord);
 
         // Update State
@@ -82,9 +81,22 @@ export function useGame(): UseGameReturn {
         const userEndChar = getLastChar(validWord);
         lastEndChar.current = userEndChar;
 
-        setTimeout(() => {
-            // AI Turn Logic
-            const aiWord = getValidNextWord(userEndChar, newUsedWords);
+        setTimeout(async () => {
+            // AI Logic: Find a valid next word using Gemini (or fallback)
+            let aiWord: string | null = null;
+            let aiMessageText = '';
+
+            try {
+                // Call Gemini to get response
+                // We need to pass the *current state* of usedWords.
+                const response = await generateAiResponse(userEndChar, newUsedWords);
+                aiWord = response.word;
+                aiMessageText = response.message;
+
+            } catch (error) {
+                console.log("AI out of moves or error", error);
+                aiWord = null;
+            }
 
             if (!aiWord) {
                 // AI cannot find a word -> User Wins
@@ -95,24 +107,19 @@ export function useGame(): UseGameReturn {
             }
 
             // AI found a word
-            addMessage('ai', aiWord);
+            addMessage('ai', aiMessageText);
 
             // Update State for AI move
-            // We need to update state again. Note: usedWords here is from closure (old), 
-            // but we know what we added. 
-            // Better to use functional state update to be safe against race conditions?
-            // But here we are in a timeout, so we should be careful.
-
             setUsedWords((prev) => {
                 const next = new Set(prev);
-                next.add(aiWord);
+                next.add(aiWord!);
                 return next;
             });
 
             lastEndChar.current = getLastChar(aiWord);
             setCurrentTurn('user');
 
-        }, 1200 + Math.random() * 1000); // 1.2s ~ 2.2s delay for realism
+        }, GAME_CONFIG.AI_DELAY_MIN + Math.random() * GAME_CONFIG.AI_DELAY_RANDOM);
 
     }, [status, currentTurn, usedWords]);
 
