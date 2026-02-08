@@ -6,9 +6,10 @@ import ChatBubble from './ChatBubble';
 
 interface ChatHistoryProps {
   messages: ChatMessage[];
+  onRestart?: () => void;
 }
 
-export default function ChatHistory({ messages }: ChatHistoryProps) {
+export default function ChatHistory({ messages, onRestart }: ChatHistoryProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function ChatHistory({ messages }: ChatHistoryProps) {
             <p className="text-xs mt-1">예: 피카츄, 이상해씨, 파이리 ...</p>
           </div>
         ) : (
-          messages.map((msg) => <ChatBubble key={msg.id} message={msg} />)
+          messages.map((msg) => <ChatBubble key={msg.id} message={msg} onRestart={onRestart} />)
         )}
         <div ref={bottomRef} />
       </div>
