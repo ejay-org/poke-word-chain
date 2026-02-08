@@ -34,7 +34,7 @@ export default function InputArea({ onSubmit, disabled = false }: InputAreaProps
           onKeyDown={handleKeyDown}
           placeholder="포켓몬 이름을 입력하세요..."
           disabled={disabled}
-          className="rounded-full"
+          className="rounded-full h-11 text-base md:text-sm"
           autoComplete="off"
         />
         <Button
@@ -42,9 +42,9 @@ export default function InputArea({ onSubmit, disabled = false }: InputAreaProps
           variant="pokedex"
           size="icon"
           disabled={disabled || !input.trim()}
-          className="rounded-full shrink-0"
+          className="rounded-full shrink-0 size-11"
         >
-          <Send className="size-4" />
+          <Send className="size-5" />
         </Button>
       </div>
     </form>

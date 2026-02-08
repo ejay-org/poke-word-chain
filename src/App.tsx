@@ -25,7 +25,7 @@ function App() {
   }, [messages]);
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-[100dvh] flex flex-col bg-background">
       <Header />
 
       <main className="flex-1 flex flex-col mx-auto w-full max-w-2xl overflow-hidden relative">
@@ -34,7 +34,7 @@ function App() {
         {/* Game Overlay for Idle/Ended states */}
         {status === 'idle' && (
           <div className="absolute inset-x-0 bottom-0 top-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-10">
-            <div className="bg-card p-8 rounded-2xl shadow-lg border text-center max-w-sm w-full">
+            <div className="bg-card p-6 sm:p-8 rounded-2xl shadow-lg border text-center max-w-sm w-full">
               <h2 className="text-2xl font-bold mb-4 text-primary">포켓몬 끝말잇기</h2>
               <p className="text-muted-foreground mb-6">
                 AI 포켓몬 마스터와 대결하세요!
