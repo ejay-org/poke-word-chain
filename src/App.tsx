@@ -1,31 +1,43 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react';
+import Header from '@/components/Header';
+import ChatHistory from '@/components/ChatHistory';
+import InputArea from '@/components/InputArea';
+import type { ChatMessage } from '@/types';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const handleSubmit = useCallback((text: string) => {
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      sender: 'user',
+      text,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    // TODO: Step 8+ 에서 게임 로직 및 AI 응답 연동
+    setTimeout(() => {
+      const aiMessage: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        sender: 'ai',
+        text: `"${text}" — 아직 게임 로직이 연결되지 않았어요. Phase 2에서 구현 예정!`,
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    }, 500);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-pokedex-red mb-4">
-          포켓몬 끝말잇기
-        </h1>
-        <p className="text-gray-600 mb-6">
-          포켓몬 이름으로 끝말잇기를 해보세요!
-        </p>
-        <div className="text-center">
-          <button
-            className="bg-pokedex-red hover:bg-pokedex-darkred text-white font-bold py-2 px-4 rounded transition-colors"
-            onClick={() => setCount((count) => count + 1)}
-          >
-            count is {count}
-          </button>
-          <p className="mt-4 text-sm text-gray-500">
-            Vite + React + Tailwind CSS
-          </p>
-        </div>
-      </div>
+    <div className="h-screen flex flex-col bg-background">
+      <Header />
+      <main className="flex-1 flex flex-col mx-auto w-full max-w-2xl overflow-hidden">
+        <ChatHistory messages={messages} />
+        <InputArea onSubmit={handleSubmit} />
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
