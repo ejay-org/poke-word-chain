@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getValidNextWord, getLastChar } from './gameLogic';
+import { getValidNextPokemon, getLastChar } from './gameLogic';
 import { GEMINI_CONFIG, SYSTEM_PROMPTS } from '@/constants';
 
 // Initialize Gemini API
@@ -42,7 +42,8 @@ function checkRateLimit(): boolean {
  */
 export function getAiWord(lastWord: string, usedWords: Set<string>): string | null {
     const endChar = getLastChar(lastWord);
-    return getValidNextWord(endChar, usedWords);
+    const pokemon = getValidNextPokemon(endChar, usedWords);
+    return pokemon ? pokemon.name : null;
 }
 
 /**
