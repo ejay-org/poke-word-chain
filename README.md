@@ -23,6 +23,7 @@
   - **Google Gemini API** (Game Logic & Persona)
   - **Web Speech API** (Text to Voice - 브라우저 내장)
 - **Deployment:** Vercel (HTTPS 환경 필수)
+- **Local Logic:** `gameLogic.ts` - 단어 검증 및 끝말잇기 규칙 처리 (포켓몬 DB 기반)
 
 ---
 
