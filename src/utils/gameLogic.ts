@@ -132,6 +132,48 @@ export function getValidNextPokemon(lastChar: string, usedWords: Set<string>): P
 }
 
 /**
+ * Checks if a Pokemon has at least one valid successor in the current database.
+ * 
+ * @param pokemon The Pokemon to check
+ * @returns true if there is at least one valid next move
+ */
+export function hasValidSuccessor(pokemon: Pokemon): boolean {
+  const lastChar = getLastChar(pokemon.name);
+  // We pass an empty set for usedWords to check for *any* theoretical successor in a fresh game state.
+  // Although in a real game, the start word itself is used, but for "startability" check,
+  // we just want to know if a word exists that starts with the last char.
+  // Actually, getValidNextPokemon filters by usedWords.
+  // If we just want to know if a successor EXISTS in the DB, we can use a fresh set.
+  // But wait, the start word WILL be in usedWords immediately. 
+  // So we should simulate that the start word is already used? 
+  // The current getValidNextPokemon checks if 'p.name' is in usedWords.
+  // So if we pass a set containing the pokemon.name, we check if there is ANOTHER pokemon.
+
+  const simulatedUsedWords = new Set<string>([pokemon.name]);
+  const nextPokemon = getValidNextPokemon(lastChar, simulatedUsedWords);
+  return nextPokemon !== null;
+}
+
+/**
+ * Gets a random Pokemon from the database that is guaranteed to have a valid successor.
+ * Used for AI to start the game safely.
+ */
+export function getSafeRandomPokemon(): Pokemon {
+  // Filter only pokemon that have a valid successor
+  // This could be expensive to calculate every time if the DB is huge, 
+  // but for 1000 pokemon it's instantaneous.
+  const safePokemonList = pokemonData.filter(hasValidSuccessor);
+
+  if (safePokemonList.length === 0) {
+    // Fallback if something is terribly wrong with data (should not happen)
+    return getRandomPokemon();
+  }
+
+  const randomIndex = Math.floor(Math.random() * safePokemonList.length);
+  return safePokemonList[randomIndex];
+}
+
+/**
  * Gets a random Pokemon from the database.
  * Used for AI to start the game.
  */
