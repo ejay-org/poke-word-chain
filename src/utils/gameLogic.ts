@@ -106,13 +106,13 @@ export function validateWord(word: string, chainWord: string, usedWords: Set<str
 }
 
 /**
- * Finds a valid next word for the AI (or Hint).
+ * Finds a valid next Pokemon for the AI (or Hint).
  * 
  * @param lastChar The last character of the previous word.
  * @param usedWords Set of words already used.
- * @returns A valid Pokemon name, or null if no move is possible.
+ * @returns A valid Pokemon object, or null if no move is possible.
  */
-export function getValidNextWord(lastChar: string, usedWords: Set<string>): string | null {
+export function getValidNextPokemon(lastChar: string, usedWords: Set<string>): Pokemon | null {
   // 1. Get valid starting characters (handling Do-eum-beop-chik)
   const candidates = getInitialSoundCandidates(lastChar);
 
@@ -128,8 +128,18 @@ export function getValidNextWord(lastChar: string, usedWords: Set<string>): stri
 
   // 3. Pick a random word from the available list
   const randomIndex = Math.floor(Math.random() * availablePokemon.length);
-  return availablePokemon[randomIndex].name;
+  return availablePokemon[randomIndex];
 }
+
+/**
+ * Gets a random Pokemon from the database.
+ * Used for AI to start the game.
+ */
+export function getRandomPokemon(): Pokemon {
+  const randomIndex = Math.floor(Math.random() * pokemonData.length);
+  return pokemonData[randomIndex];
+}
+
 
 /**
  * Helper to get the last character of a word for the next chain.

@@ -38,52 +38,36 @@ function checkRateLimit(): boolean {
 }
 
 /**
- * Generates a response from the AI Pokemon Master.
- * 
- * @param lastWord The word the user just said.
- * @param usedWords The history of used words to avoid duplication.
- * @returns A promise that resolves to the AI's word and message.
+ * Finds a valid word locally for the AI to allow immediate response.
  */
-export async function generateAiResponse(lastWord: string, usedWords: Set<string>): Promise<{ word: string; message: string }> {
+export function getAiWord(lastWord: string, usedWords: Set<string>): string | null {
     const endChar = getLastChar(lastWord);
+    return getValidNextWord(endChar, usedWords);
+}
 
-    // 1. First, find a valid word locally to ensure gameplay continuity.
-    const validWord = getValidNextWord(endChar, usedWords);
-
-    if (!validWord) {
-        throw new Error('No valid moves left for AI.');
-    }
-
-    // If local fallback logic triggers, we use this message
-    // If API is not available, return a generic response with the valid word.
+/**
+ * Generates the persona-based message for the chosen word asynchronously.
+ */
+export async function getAiMessage(aiWord: string, lastWord: string): Promise<string> {
     if (!model) {
-        return {
-            word: validWord,
-            message: `${validWord}! (API 키가 없어서 로컬 로직으로 응답함)`
-        };
+        return `${aiWord}! (API 키가 없어서 로컬 로직으로 응답함)`;
     }
 
     // Check Rate Limit
     if (!checkRateLimit()) {
         console.warn('Gemini API Rate Limit Exceeded (Client-side check). Falling back to local logic.');
-        return {
-            word: validWord,
-            message: `${validWord}! (말을 너무 많이 했더니 숨차... 잠시만 천천히 할게 헥헥)`
-        };
+        return `${aiWord}! (말을 너무 많이 했더니 숨차... 잠시만 천천히 할게 헥헥)`;
     }
 
     try {
-        // 2. Prompt Gemini to generate a persona-based message using the selected word.
-        const prompt = SYSTEM_PROMPTS.POKEMON_MASTER(lastWord, validWord);
+        // Prompt Gemini to generate a persona-based message using the selected word.
+        const prompt = SYSTEM_PROMPTS.POKEMON_MASTER(lastWord, aiWord);
 
         const result = await model.generateContent(prompt);
         const response = result.response;
         const text = response.text();
 
-        return {
-            word: validWord,
-            message: text.trim()
-        };
+        return text.trim();
 
     } catch (error: any) {
         console.error('Gemini API Error (Primary Model):', error);
@@ -95,28 +79,19 @@ export async function generateAiResponse(lastWord: string, usedWords: Set<string
             try {
                 // Initialize/Use fallback model
                 const fallbackModel = genAI!.getGenerativeModel({ model: GEMINI_CONFIG.FALLBACK_MODEL_NAME });
-                const prompt = SYSTEM_PROMPTS.POKEMON_MASTER(lastWord, validWord);
+                const prompt = SYSTEM_PROMPTS.POKEMON_MASTER(lastWord, aiWord);
                 const result = await fallbackModel.generateContent(prompt);
                 const response = result.response;
                 const text = response.text();
 
-                return {
-                    word: validWord,
-                    message: text.trim()
-                };
+                return text.trim();
             } catch (fallbackError: any) {
                 console.error('Gemini API Error (Fallback Model):', fallbackError);
-                return {
-                    word: validWord,
-                    message: `${validWord}! (AI가 지금 너무 피곤해서... 잠깐 쉴게 😴)`
-                };
+                return `${aiWord}! (AI가 지금 너무 피곤해서... 잠깐 쉴게 😴)`;
             }
         }
 
         // Fallback to basic message
-        return {
-            word: validWord,
-            message: `${validWord}! (AI 연결 상태가 좋지 않아...)`
-        };
+        return `${aiWord}! (AI 연결 상태가 좋지 않아...)`;
     }
 }

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import ChatHistory from '@/components/ChatHistory';
 import InputArea from '@/components/InputArea';
@@ -17,7 +17,6 @@ function App() {
     resetGame
   } = useGame();
 
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom of chat
   useEffect(() => {
@@ -30,7 +29,7 @@ function App() {
       <Header />
 
       <main className="flex-1 flex flex-col mx-auto w-full max-w-2xl overflow-hidden relative">
-        <ChatHistory messages={messages} />
+        <ChatHistory messages={messages} onRestart={resetGame} />
 
         {/* Game Overlay for Idle/Ended states */}
         {status === 'idle' && (
@@ -42,24 +41,17 @@ function App() {
                 <br />
                 끝말잇기 규칙과 두음법칙이 적용됩니다.
               </p>
-              <Button onClick={startGame} size="lg" className="w-full text-lg h-12">
-                <PlayCircle className="mr-2 size-5" />
-                게임 시작
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {(status === 'won' || status === 'lost') && (
-          <div className="absolute inset-x-0 bottom-24 p-4 z-10 flex justify-center animate-in slide-in-from-bottom-5 fade-in">
-            <div className="bg-card px-6 py-4 rounded-full shadow-xl border flex gap-4 items-center">
-              <span className="font-bold text-lg">
-                {status === 'won' ? '🎉 승리!' : '💀 패배...'}
-              </span>
-              <Button onClick={startGame} variant="default" size="sm">
-                <RotateCcw className="mr-2 size-4" />
-                다시 하기
-              </Button>
+              <div className="flex flex-col gap-3 w-full">
+                <Button onClick={() => startGame('ai')} size="lg" className="w-full text-lg h-12 relative overflow-hidden group">
+                  <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20 group-hover:opacity-30 transition-opacity"></span>
+                  <PlayCircle className="mr-2 size-5" />
+                  AI 모드 시작 (페르소나)
+                </Button>
+                <Button onClick={() => startGame('normal')} variant="outline" size="lg" className="w-full text-lg h-12">
+                  <PlayCircle className="mr-2 size-5" />
+                  일반 모드 시작 (빠름)
+                </Button>
+              </div>
             </div>
           </div>
         )}

@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { ChatMessage } from '@/types';
+import { Button } from '@/components/ui/button';
+import { RotateCcw, Eye } from 'lucide-react';
 
 interface ChatBubbleProps {
   message: ChatMessage;
+  onRestart?: () => void;
 }
 
-export default function ChatBubble({ message }: ChatBubbleProps) {
+export default function ChatBubble({ message, onRestart }: ChatBubbleProps) {
   const isUser = message.sender === 'user';
+  const [showAnswer, setShowAnswer] = useState(false);
 
   return (
     <div className={cn('flex mb-3', isUser ? 'justify-end' : 'justify-start')}>
@@ -26,6 +31,26 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
           )}
         >
           {message.text}
+
+          {message.hintAnswer && (
+            <div className="mt-3 pt-2 border-t border-border/50">
+              {!showAnswer ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowAnswer(true)}
+                  className="h-7 text-xs w-full bg-secondary/50 hover:bg-secondary"
+                >
+                  <Eye className="size-3 mr-1.5" />
+                  정답 보기
+                </Button>
+              ) : (
+                <div className="text-xs font-bold text-primary animate-in fade-in slide-in-from-top-1">
+                  💡 정답: {message.hintAnswer}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {message.pokemonImageUrl && (
@@ -33,9 +58,18 @@ export default function ChatBubble({ message }: ChatBubbleProps) {
             <img
               src={message.pokemonImageUrl}
               alt={message.pokemonName || '포켓몬'}
-              className="size-16 object-contain"
+              className="size-32 object-contain"
               loading="lazy"
             />
+          </div>
+        )}
+
+        {message.isGameEnd && onRestart && (
+          <div className="mt-3 flex justify-center animate-in zoom-in-95 fade-in duration-300">
+            <Button onClick={onRestart} className="w-full shadow-md bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+              <RotateCcw className="mr-2 size-4" />
+              다시 하기
+            </Button>
           </div>
         )}
       </div>
