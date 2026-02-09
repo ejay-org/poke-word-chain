@@ -152,6 +152,7 @@ export function useGame(): UseGameReturn {
 
                 // 4. CHECK IF USER LOST (No moves left)
                 const userNextMove = getValidNextPokemon(aiEndChar, updatedUsedWords);
+
                 if (!userNextMove) {
                     setTimeout(() => {
                         addMessage('system', `더 이상 '${aiEndChar}'(으)로 시작하는 포켓몬이 없습니다.`, { isGameEnd: true });

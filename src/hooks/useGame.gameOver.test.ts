@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useGame } from './useGame';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as gameLogic from '@/utils/gameLogic';
-import * as geminiApi from '@/utils/gemini_api';
+
 
 // Mock dependencies
 vi.mock('@/utils/gameLogic', async (importOriginal) => {
@@ -46,12 +46,10 @@ describe('useGame Hook - User Game Over', () => {
         // AI plays 'AiMon'
         (gameLogic.getValidNextPokemon as any).mockImplementation((lastChar: string, usedWords: Set<string>) => {
             if (lastChar === 'n') { // Last char of 'UserMon'
+                if (usedWords.has('AiMon')) {
+                    return null;
+                }
                 return { name: 'AiMon', imageUrl: 'ai.png' };
-            }
-            // Helper logic check for Step 4 "User Check"
-            // When checking for 'AiMon' last char 'n', we return NULL to simulate NO MOVES
-            if (lastChar === 'n' && usedWords.has('AiMon')) {
-                return null;
             }
             return null;
         });
