@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, act } from '@testing-library/react';
 import { useGame } from './useGame';
@@ -12,6 +13,7 @@ vi.mock('@/utils/gameLogic', async (importOriginal) => {
         ...actual,
         getValidNextPokemon: vi.fn(),
         getRandomPokemon: vi.fn(),
+        getSafeRandomPokemon: vi.fn(),
         validateWord: vi.fn(),
         getLastChar: (word: string) => word.slice(-1),
     };
@@ -26,6 +28,11 @@ describe('useGame Hook - AI Image Display', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.useFakeTimers();
+        // Default safe start pokemon to avoid crashes in tests that don't specify it
+        (gameLogic.getSafeRandomPokemon as any).mockReturnValue({
+            name: '피카츄',
+            imageUrl: 'pika.png'
+        });
     });
 
     afterEach(() => {
@@ -39,8 +46,8 @@ describe('useGame Hook - AI Image Display', () => {
             pokemon: { name: '파이리', imageUrl: 'user-img.png' }
         });
 
-        // Mock getRandomPokemon for Start Game
-        (gameLogic.getRandomPokemon as any).mockReturnValue({
+        // Mock getSafeRandomPokemon for Start Game
+        (gameLogic.getSafeRandomPokemon as any).mockReturnValue({
             name: '피카츄',
             imageUrl: 'pika.png'
         });

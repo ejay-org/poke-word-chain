@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { validateWord, getValidNextPokemon, getLastChar, getRandomPokemon } from '@/utils/gameLogic';
+import { validateWord, getValidNextPokemon, getLastChar, getSafeRandomPokemon } from '@/utils/gameLogic';
 import { getAiMessage } from '@/utils/gemini_api';
 import { GAME_CONFIG } from '@/constants';
 import type { ChatMessage, GameMode } from '@/types';
@@ -61,7 +61,7 @@ export function useGame(): UseGameReturn {
 
         // AI Start Logic with Delay
         setTimeout(() => {
-            const startPokemon = getRandomPokemon();
+            const startPokemon = getSafeRandomPokemon();
             const startWord = startPokemon.name;
 
             // Immediate display
