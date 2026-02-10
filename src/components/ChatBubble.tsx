@@ -15,38 +15,40 @@ export default function ChatBubble({ message, onRestart, onImageLoad }: ChatBubb
   const [showAnswer, setShowAnswer] = useState(false);
 
   return (
-    <div className={cn('flex mb-3', isUser ? 'justify-end' : 'justify-start')}>
+    <div className={cn('flex mb-4 items-end', isUser ? 'justify-end' : 'justify-start')}>
       {!isUser && (
-        <div className="size-8 shrink-0 mt-1 mr-2 rounded-full bg-pokedex-red text-white flex items-center justify-center text-sm font-bold">
-          P
+        <div className="size-10 shrink-0 mr-3 rounded-full bg-[#EE1515] border-2 border-white shadow-md flex items-center justify-center text-white font-bold relative overflow-hidden">
+          {/* Pokeball line effect */}
+          <div className="absolute inset-x-0 top-[45%] h-[10%] bg-[#222224]"></div>
+          <div className="absolute top-[35%] left-[35%] w-[30%] h-[30%] bg-white rounded-full border-2 border-[#222224] z-10"></div>
         </div>
       )}
 
-      <div className="max-w-[75%]">
+      <div className={cn("max-w-[75%] flex flex-col", isUser && "items-end")}>
         <div
           className={cn(
-            'px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
+            'px-5 py-3 rounded-2xl text-[15px] leading-relaxed relative shadow-md',
             isUser
-              ? 'bg-pokedex-red text-white rounded-br-md'
-              : 'bg-card text-card-foreground rounded-bl-md shadow-sm border'
+              ? 'bg-[#EE1515] text-white rounded-br-none'
+              : 'bg-white text-[#222224] rounded-bl-none border border-gray-200'
           )}
         >
           {message.text}
 
           {message.hintAnswer && (
-            <div className="mt-3 pt-2 border-t border-border/50">
+            <div className="mt-3 pt-2 border-t border-black/10">
               {!showAnswer ? (
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setShowAnswer(true)}
-                  className="h-7 text-xs w-full bg-secondary/50 hover:bg-secondary"
+                  className="h-auto py-1 px-2 text-xs w-full hover:bg-black/5 text-[#EE1515]"
                 >
                   <Eye className="size-3 mr-1.5" />
                   정답 보기
                 </Button>
               ) : (
-                <div className="text-xs font-bold text-primary animate-in fade-in slide-in-from-top-1">
+                <div className="text-xs font-bold text-[#EE1515] animate-in fade-in slide-in-from-top-1">
                   💡 정답: {message.hintAnswer}
                 </div>
               )}
@@ -55,7 +57,7 @@ export default function ChatBubble({ message, onRestart, onImageLoad }: ChatBubb
         </div>
 
         {message.pokemonImageUrl && (
-          <div className={cn('mt-1.5', isUser && 'flex justify-end')}>
+          <div className="mt-2 inline-block">
             <img
               src={message.pokemonImageUrl}
               alt={message.pokemonName || '포켓몬'}
@@ -67,8 +69,8 @@ export default function ChatBubble({ message, onRestart, onImageLoad }: ChatBubb
         )}
 
         {message.isGameEnd && onRestart && (
-          <div className="mt-3 flex justify-center animate-in zoom-in-95 fade-in duration-300">
-            <Button onClick={onRestart} className="w-full shadow-md bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+          <div className="mt-3 flex justify-center animate-in zoom-in-95 fade-in duration-300 w-full">
+            <Button onClick={onRestart} className="shadow-lg bg-[#EE1515] hover:bg-[#D00000] text-white font-bold rounded-full px-6 border-2 border-white ring-2 ring-[#EE1515]/20">
               <RotateCcw className="mr-2 size-4" />
               다시 하기
             </Button>
@@ -77,7 +79,7 @@ export default function ChatBubble({ message, onRestart, onImageLoad }: ChatBubb
       </div>
 
       {isUser && (
-        <div className="size-8 shrink-0 mt-1 ml-2 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">
+        <div className="size-10 shrink-0 ml-3 rounded-full bg-[#222224] flex items-center justify-center text-white font-bold shadow-sm">
           나
         </div>
       )}
