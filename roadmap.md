@@ -81,10 +81,10 @@
 - [ ] **Step 33**: 게임 설정 UI (난이도, 음성 속도, 테마 등)
 
 ## Phase 7: 포켓몬 도감 (Pokemon Encyclopedia)
-- [ ] **Step 34**: 메인 화면 분리 (게임 모드 / 도감 모드)
-- [ ] **Step 35**: 포켓몬 도감 기본 레이아웃 구현
-- [ ] **Step 36**: 포켓몬 상세 정보 페이지 구현
-- [ ] **Step 37**: 도감 데이터 연동 (PokeAPI or Local Data)
+- [x] **Step 34**: 메인 화면 분리 (게임 모드 / 도감 모드)
+- [x] **Step 35**: 포켓몬 도감 기본 레이아웃 구현
+- [x] **Step 36**: 포켓몬 상세 정보 페이지 구현 (검색 기반 카드 UI)
+- [x] **Step 37**: 도감 데이터 연동 (Local Data: pokemonData.json)
 
 ## Phase 8: 배포 및 성능 최적화
 - [ ] **Step 34**: Vercel 배포 설정 및 환경 변수 등록
