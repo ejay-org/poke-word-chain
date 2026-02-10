@@ -141,17 +141,27 @@ export function useGame(): UseGameReturn {
                 });
 
                 // 3. Update Game State Immediately
-                setUsedWords((prev) => {
-                    const next = new Set(prev);
-                    next.add(aiWord);
-                    return next;
-                });
+                const updatedUsedWords = new Set(newUsedWords);
+                updatedUsedWords.add(aiWord);
 
-                lastEndChar.current = getLastChar(aiWord);
+                setUsedWords(updatedUsedWords);
+
+                const aiEndChar = getLastChar(aiWord);
+                lastEndChar.current = aiEndChar;
                 setCurrentTurn('user');
 
-                // 4. Async: Fetch Persona Message (AI Mode Only)
-                if (gameMode === 'ai') {
+                // 4. CHECK IF USER LOST (No moves left)
+                const userNextMove = getValidNextPokemon(aiEndChar, updatedUsedWords);
+
+                if (!userNextMove) {
+                    setTimeout(() => {
+                        addMessage('system', `더 이상 '${aiEndChar}'(으)로 시작하는 포켓몬이 없습니다.`, { isGameEnd: true });
+                        setStatus('lost');
+                    }, 500); // Slight delay for dramatic effect
+                }
+
+                // 5. Async: Fetch Persona Message (AI Mode Only)
+                if (gameMode === 'ai' && !!userNextMove) { // Only fetch persona if game continues
                     try {
                         const fullMessage = await getAiMessage(aiWord, userEndChar);
                         updateMessage(aiMsgId, { text: fullMessage });
@@ -168,7 +178,7 @@ export function useGame(): UseGameReturn {
             }
         }, GAME_CONFIG.AI_DELAY_MIN + Math.random() * GAME_CONFIG.AI_DELAY_RANDOM);
 
-    }, [status, currentTurn, usedWords]);
+    }, [status, currentTurn, usedWords, gameMode]);
 
     const giveHint = useCallback(() => {
         if (status !== 'playing') return;

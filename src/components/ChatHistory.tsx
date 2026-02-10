@@ -28,7 +28,14 @@ export default function ChatHistory({ messages, onRestart }: ChatHistoryProps) {
             <p className="text-xs mt-1">예: 피카츄, 이상해씨, 파이리 ...</p>
           </div>
         ) : (
-          messages.map((msg) => <ChatBubble key={msg.id} message={msg} onRestart={onRestart} />)
+          messages.map((msg) => (
+            <ChatBubble
+              key={msg.id}
+              message={msg}
+              onRestart={onRestart}
+              onImageLoad={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            />
+          ))
         )}
         <div ref={bottomRef} />
       </div>

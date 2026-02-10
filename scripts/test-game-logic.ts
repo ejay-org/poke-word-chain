@@ -1,6 +1,5 @@
 
 import { validateWord } from '../src/utils/gameLogic';
-import type { Pokemon } from '../src/utils/gameLogic';
 
 // Mock Pokemon Data for testing? No, we will use the real one imported in gameLogic.ts
 // But since we are running this with ts-node or similar, we might need to handle JSON imports.

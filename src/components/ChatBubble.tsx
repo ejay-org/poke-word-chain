@@ -7,9 +7,10 @@ import { RotateCcw, Eye } from 'lucide-react';
 interface ChatBubbleProps {
   message: ChatMessage;
   onRestart?: () => void;
+  onImageLoad?: () => void;
 }
 
-export default function ChatBubble({ message, onRestart }: ChatBubbleProps) {
+export default function ChatBubble({ message, onRestart, onImageLoad }: ChatBubbleProps) {
   const isUser = message.sender === 'user';
   const [showAnswer, setShowAnswer] = useState(false);
 
@@ -60,6 +61,7 @@ export default function ChatBubble({ message, onRestart }: ChatBubbleProps) {
               alt={message.pokemonName || '포켓몬'}
               className="size-32 object-contain"
               loading="lazy"
+              onLoad={onImageLoad}
             />
           </div>
         )}

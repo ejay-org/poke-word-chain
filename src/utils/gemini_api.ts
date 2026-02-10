@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getValidNextPokemon, getLastChar } from './gameLogic';
 import { GEMINI_CONFIG, SYSTEM_PROMPTS } from '@/constants';
