@@ -33,7 +33,7 @@ export default function HomePage() {
                     onClick={() => navigate('/pokedex')}
                 >
                     <BookOpen className="mr-2 h-6 w-6" />
-                    포켓몬 도감 (준비중)
+                    포켓몬 도감
                 </Button>
             </div>
         </div>

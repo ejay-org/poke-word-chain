@@ -4,6 +4,7 @@ import pokemonDataRaw from '../data/pokemonData.json';
 export interface Pokemon {
   id: number;
   name: string;
+  nameEn?: string;
   generation: number;
   types: string[];
   typesEn: string[];
