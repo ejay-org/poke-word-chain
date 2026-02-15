@@ -12,11 +12,8 @@ export default function HomePage() {
 
             <div className="text-center space-y-2 relative z-10 transform hover:scale-105 transition-transform duration-300">
                 <h1 className="text-5xl font-extrabold tracking-tight lg:text-7xl text-[#EE1515] drop-shadow-[0_4px_4px_rgba(0,0,0,0.15)]">
-                    Poke<br />Word Chain
+                    Poke<br />World
                 </h1>
-                <p className="text-xl text-foreground font-bold mt-4">
-                    Gotta Catch 'Em Words!
-                </p>
             </div>
 
             <div className="grid gap-6 w-full max-w-sm relative z-10">

@@ -119,7 +119,7 @@ export function useGame(): UseGameReturn {
         // AI Logic: Non-blocking (Immediate word/image, Async message)
         setTimeout(async () => {
             try {
-                // 1. Select AI Pokemon Immediately
+                // 1. Select AI Pokemon
                 const aiPokemon = getValidNextPokemon(userEndChar, newUsedWords);
 
                 if (!aiPokemon) {
@@ -132,43 +132,71 @@ export function useGame(): UseGameReturn {
                 const aiWord = aiPokemon.name;
                 const aiImage = aiPokemon.imageUrl;
 
-                // 2. Immediate Display (Word + Image)
-                const initialText = gameMode === 'normal' ? `${aiWord}!` : `${aiWord} (AI가 고민 중... 💭)`;
+                // 2. Handle Display based on Mode
+                if (gameMode === 'normal') {
+                    // Normal Mode: Show immediately
+                    addMessage('ai', `${aiWord}!`, {
+                        pokemonName: aiWord,
+                        pokemonImageUrl: aiImage
+                    });
 
-                const aiMsgId = addMessage('ai', initialText, {
-                    pokemonName: aiWord,
-                    pokemonImageUrl: aiImage
-                });
+                    // Update contents
+                    const updatedUsedWords = new Set(newUsedWords);
+                    updatedUsedWords.add(aiWord);
+                    setUsedWords(updatedUsedWords);
 
-                // 3. Update Game State Immediately
-                const updatedUsedWords = new Set(newUsedWords);
-                updatedUsedWords.add(aiWord);
+                    const aiEndChar = getLastChar(aiWord);
+                    lastEndChar.current = aiEndChar;
+                    setCurrentTurn('user');
 
-                setUsedWords(updatedUsedWords);
+                    // Check if User Lost
+                    const userNextMove = getValidNextPokemon(aiEndChar, updatedUsedWords);
+                    if (!userNextMove) {
+                        setTimeout(() => {
+                            addMessage('system', `더 이상 '${aiEndChar}'(으)로 시작하는 포켓몬이 없습니다.`, { isGameEnd: true });
+                            setStatus('lost');
+                        }, 500);
+                    }
 
-                const aiEndChar = getLastChar(aiWord);
-                lastEndChar.current = aiEndChar;
-                setCurrentTurn('user');
+                } else {
+                    // AI Mode: Show "Thinking" first, then reveal
+                    const aiMsgId = addMessage('ai', 'AI가 고민 중... 💭');
 
-                // 4. CHECK IF USER LOST (No moves left)
-                const userNextMove = getValidNextPokemon(aiEndChar, updatedUsedWords);
-
-                if (!userNextMove) {
-                    setTimeout(() => {
-                        addMessage('system', `더 이상 '${aiEndChar}'(으)로 시작하는 포켓몬이 없습니다.`, { isGameEnd: true });
-                        setStatus('lost');
-                    }, 500); // Slight delay for dramatic effect
-                }
-
-                // 5. Async: Fetch Persona Message (AI Mode Only)
-                if (gameMode === 'ai' && !!userNextMove) { // Only fetch persona if game continues
                     try {
                         const fullMessage = await getAiMessage(aiWord, userEndChar);
-                        updateMessage(aiMsgId, { text: fullMessage });
+
+                        // Update with real content
+                        updateMessage(aiMsgId, {
+                            text: fullMessage,
+                            pokemonName: aiWord,
+                            pokemonImageUrl: aiImage
+                        });
                     } catch (err) {
                         console.error("Failed to get AI message", err);
-                        // If failed, just keep the word
-                        updateMessage(aiMsgId, { text: `${aiWord}!` });
+                        // Fallback
+                        updateMessage(aiMsgId, {
+                            text: `${aiWord}!`,
+                            pokemonName: aiWord,
+                            pokemonImageUrl: aiImage
+                        });
+                    }
+
+                    // Update Game State (after delay)
+                    const updatedUsedWords = new Set(newUsedWords);
+                    updatedUsedWords.add(aiWord);
+                    setUsedWords(updatedUsedWords);
+
+                    const aiEndChar = getLastChar(aiWord);
+                    lastEndChar.current = aiEndChar;
+                    setCurrentTurn('user');
+
+                    // Check if User Lost
+                    const userNextMove = getValidNextPokemon(aiEndChar, updatedUsedWords);
+                    if (!userNextMove) {
+                        setTimeout(() => {
+                            addMessage('system', `더 이상 '${aiEndChar}'(으)로 시작하는 포켓몬이 없습니다.`, { isGameEnd: true });
+                            setStatus('lost');
+                        }, 500);
                     }
                 }
 
@@ -178,7 +206,7 @@ export function useGame(): UseGameReturn {
             }
         }, GAME_CONFIG.AI_DELAY_MIN + Math.random() * GAME_CONFIG.AI_DELAY_RANDOM);
 
-    }, [status, currentTurn, usedWords, gameMode]);
+    }, [status, currentTurn, usedWords, gameMode, updateMessage]);
 
     const giveHint = useCallback(() => {
         if (status !== 'playing') return;
