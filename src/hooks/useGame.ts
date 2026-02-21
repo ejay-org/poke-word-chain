@@ -16,6 +16,7 @@ interface UseGameReturn {
     startGame: (mode: GameMode) => void;
     submitUserWord: (word: string) => void;
     giveHint: () => void;
+    revealAnswer: () => void;
     resetGame: () => void;
     updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
 }
@@ -220,6 +221,17 @@ export function useGame(): UseGameReturn {
         }
     }, [status, usedWords]);
 
+    const revealAnswer = useCallback(() => {
+        if (status !== 'playing') return;
+
+        const answerPokemon = getValidNextPokemon(lastEndChar.current, usedWords);
+        if (answerPokemon) {
+            addMessage('system', `✅ 정답: ${answerPokemon.name}`, { hintAnswer: answerPokemon.name });
+        } else {
+            addMessage('system', '정답이 존재하지 않습니다. 당신이 이겼어요! 🎉');
+        }
+    }, [status, usedWords]);
+
     return {
         messages,
         status,
@@ -229,6 +241,7 @@ export function useGame(): UseGameReturn {
         startGame,
         submitUserWord,
         giveHint,
+        revealAnswer,
         resetGame,
         updateMessage,
     };

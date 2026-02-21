@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* ── shadcn/ui CSS variable bridge for Tailwind v4 ── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -24,92 +25,59 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-
-  /* 포켓덱스 커스텀 색상 */
-  --color-pokedex-red: #DC0A2D;
-  --color-pokedex-darkred: #B00020;
 }
 
+/* ── Light theme ── */
+/* Palette: rgb(229,231,235) (Gray BG) · #FFA69E (Coral Pink) · #FAF3DD (Cream) */
 :root {
-  /* Pokeball Theme Colors */
-  /* Red: #EE1515 (Pokeball Upper Half) */
-  /* White: #FFFFFF (Pokeball Lower Half) */
-  /* Black: #222224 (Pokeball Band) */
+  --background: rgb(229, 231, 235);
+  --foreground: #5a3a3a;
 
-  --background: #F8F9FA;
-  /* Very light gray/white */
-  --foreground: #222224;
-  /* Dark gray/black */
+  --card: #FAF3DD;
+  --card-foreground: #5a3a3a;
 
-  --card: #FFFFFF;
-  --card-foreground: #222224;
+  --popover: #FAF3DD;
+  --popover-foreground: #5a3a3a;
 
-  --popover: #FFFFFF;
-  --popover-foreground: #222224;
+  /* Primary = Coral Pink */
+  --primary: #FFA69E;
+  --primary-foreground: #ffffff;
 
-  /* Primary: Pokeball Red */
-  --primary: #EE1515;
-  --primary-foreground: #FFFFFF;
+  /* Secondary = Cream */
+  --secondary: #FAF3DD;
+  --secondary-foreground: #FFA69E;
 
-  /* Secondary: White/Gray for contrast */
-  --secondary: #FFFFFF;
-  --secondary-foreground: #EE1515;
+  /* Muted */
+  --muted: #f0ece0;
+  --muted-foreground: #a08080;
 
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  /* Accent = lighter coral */
+  --accent: #FFD6D2;
+  --accent-foreground: #d0706a;
 
-  --accent: #222224;
-  /* Black band color */
-  --accent-foreground: #FFFFFF;
+  --destructive: #e05050;
+  --destructive-foreground: #ffffff;
 
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #EE1515;
+  --border: #FFA69E;
+  --input: #e8e8e8;
+  --ring: #FFA69E;
 
   --radius: 1rem;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-}
-
+/* ── Base styles ── */
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    font-family:
+      "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+      "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
+      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -122,20 +90,50 @@ body,
   margin: 0;
 }
 
-/* 스크롤바 스타일 */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.15);
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--primary) 40%, transparent);
   border-radius: 3px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.25);
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+/* ── Scrollbar utility for horizontal lists ── */
+.scrollbar-hide-until-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-hide-until-hover:hover,
+.scrollbar-hide-until-hover:active,
+.scrollbar-hide-until-hover:focus-within {
+  scrollbar-color: color-mix(in srgb, var(--primary) 40%, transparent) transparent;
+}
+
+.scrollbar-hide-until-hover::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+}
+
+.scrollbar-hide-until-hover:hover::-webkit-scrollbar-thumb,
+.scrollbar-hide-until-hover:active::-webkit-scrollbar-thumb,
+.scrollbar-hide-until-hover:focus-within::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+/* ── Dot pattern for home page ── */
+.dot-pattern {
+  background-image: radial-gradient(circle, #FFA69E22 1px, transparent 1px);
+  background-size: 20px 20px;
 }
