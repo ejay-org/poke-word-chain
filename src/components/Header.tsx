@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 export default function Header({
-  title = "Poke Word Chain",
+  title = "게임 시작",
   subtitle = "포켓몬 이름으로 끝말잇기 배틀!"
 }: {
   title?: string;
