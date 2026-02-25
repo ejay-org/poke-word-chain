@@ -1,7 +1,5 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Send } from 'lucide-react';
+import { Image, Send } from 'lucide-react';
 
 interface InputAreaProps {
   onSubmit: (text: string) => void;
@@ -26,26 +24,36 @@ export default function InputArea({ onSubmit, disabled = false }: InputAreaProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t bg-background px-4 py-3 pb-6">
-      <div className="mx-auto max-w-2xl relative">
-        <Input
+    <form onSubmit={handleSubmit} className="flex items-center gap-3">
+      {/* Input pill */}
+      <div className="flex-1 relative flex items-center bg-card rounded-full border border-primary/15 shadow-sm overflow-hidden h-13">
+        <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="포켓몬 이름을 입력하세요..."
+          placeholder="Type a Pokemon name..."
           disabled={disabled}
-          className="rounded-full h-14 pl-6 pr-14 text-lg shadow-sm border-2 border-gray-200 focus-visible:border-[#EE1515] focus-visible:ring-[#EE1515]/20 transition-all bg-white"
           autoComplete="off"
+          className="flex-1 bg-transparent pl-5 pr-2 py-3.5 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none"
         />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={disabled || !input.trim()}
-          className="absolute right-2 top-2 bottom-2 aspect-square h-auto w-auto rounded-full bg-[#EE1515] hover:bg-[#D00000] text-white shadow-md disabled:opacity-50 transition-all active:scale-95"
+        {/* Image icon inside input */}
+        <button
+          type="button"
+          className="px-3 text-muted-foreground/50 hover:text-primary transition-colors flex-shrink-0"
+          tabIndex={-1}
         >
-          <Send className="size-5 ml-0.5" />
-        </Button>
+          <Image className="size-4" />
+        </button>
       </div>
+
+      {/* Send button — coral circle */}
+      <button
+        type="submit"
+        disabled={disabled || !input.trim()}
+        className="size-13 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 flex-shrink-0"
+      >
+        <Send className="size-5 text-white ml-0.5" />
+      </button>
     </form>
   );
 }
