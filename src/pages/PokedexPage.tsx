@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Heart, Camera, ArrowLeft } from 'lucide-react';
+import { Search, Heart, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import pokemonData from '@/data/pokemonData.json';
@@ -209,10 +209,6 @@ export default function PokedexPage() {
                 )}
             </div>
 
-            {/* FAB Camera */}
-            <button className="fixed bottom-20 right-5 w-12 h-12 rounded-full bg-primary shadow-lg flex items-center justify-center hover:scale-105 transition-transform active:scale-95 z-40">
-                <Camera className="size-5 text-white" />
-            </button>
         </div>
     );
 }

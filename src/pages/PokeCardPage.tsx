@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Heart, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import pokemonData from '@/data/pokemonData.json';
 
 interface Pokemon {
@@ -44,6 +45,52 @@ export default function PokeCardPage() {
     const allPokemon = pokemonData as Pokemon[];
     const pokemon = allPokemon.find((p) => p.id === Number(id));
 
+    const [touchStartX, setTouchStartX] = useState<number | null>(null);
+    const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
+
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchCurrentX(null);
+        setTouchStartX(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchCurrentX(e.targetTouches[0].clientX);
+    };
+
+    const onMouseDown = (e: React.MouseEvent) => {
+        setTouchCurrentX(null);
+        setTouchStartX(e.clientX);
+    };
+
+    const onMouseMove = (e: React.MouseEvent) => {
+        if (touchStartX !== null) {
+            setTouchCurrentX(e.clientX);
+        }
+    };
+
+    const handleSwipeEnd = () => {
+        if (touchStartX === null || touchCurrentX === null || !pokemon) return;
+        const distance = touchStartX - touchCurrentX;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe && pokemon.evolvesToIds && pokemon.evolvesToIds.length > 0) {
+            navigate(`/pokecard/${pokemon.evolvesToIds[0]}`);
+        } else if (isRightSwipe && pokemon.evolvesFromId) {
+            navigate(`/pokecard/${pokemon.evolvesFromId}`);
+        }
+
+        setTouchStartX(null);
+        setTouchCurrentX(null);
+    };
+
+    // Calculate image offset for pull animation
+    const imageOffsetX = (touchStartX !== null && touchCurrentX !== null)
+        ? touchCurrentX - touchStartX
+        : 0;
+
     if (!pokemon) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
@@ -78,7 +125,17 @@ export default function PokeCardPage() {
 
     return (
         // 전체 배경을 카드와 동일한 크림색(card)으로 통일
-        <div className="min-h-screen bg-card flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div
+            className="min-h-screen bg-card flex flex-col"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={handleSwipeEnd}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={handleSwipeEnd}
+            onMouseLeave={handleSwipeEnd}
+        >
 
             {/* Top Bar */}
             <div className="px-5 pt-6 pb-2 flex items-center justify-between">
@@ -97,7 +154,7 @@ export default function PokeCardPage() {
             {/* Pokemon Image Card */}
             <div className="px-5 pt-2 pb-4">
                 <div
-                    className="w-full rounded-3xl overflow-hidden shadow-lg"
+                    className="w-full rounded-3xl overflow-hidden shadow-lg relative"
                     style={{ background: `linear-gradient(135deg, #2d2d3a 0%, #1a1a25 100%)` }}
                 >
                     <div className="h-56 flex items-center justify-center relative p-4">
@@ -106,12 +163,34 @@ export default function PokeCardPage() {
                             className="absolute inset-0 opacity-20"
                             style={{ background: `radial-gradient(circle at 50% 60%, ${cardBgColor}, transparent 70%)` }}
                         />
+
+                        {/* Prev Indicator */}
+                        {pokemon.evolvesFromId && (
+                            <button
+                                onClick={() => navigate(`/pokecard/${pokemon.evolvesFromId}`)}
+                                className="absolute left-2 z-20 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all active:scale-90"
+                            >
+                                <ChevronLeft className="size-5 text-white opacity-80" />
+                            </button>
+                        )}
+
                         <img
                             src={pokemon.imageUrl}
                             alt={pokemon.name}
-                            className="h-48 w-48 object-contain drop-shadow-2xl relative z-10"
+                            className={`h-48 w-48 object-contain drop-shadow-2xl relative z-10 ${touchStartX === null ? 'transition-transform duration-300' : ''}`}
+                            style={{ transform: `translateX(${imageOffsetX * 0.5}px)` }}
                             draggable={false}
                         />
+
+                        {/* Next Indicator */}
+                        {pokemon.evolvesToIds && pokemon.evolvesToIds.length > 0 && (
+                            <button
+                                onClick={() => navigate(`/pokecard/${pokemon.evolvesToIds[0]}`)}
+                                className="absolute right-2 z-20 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all active:scale-90"
+                            >
+                                <ChevronRight className="size-5 text-white opacity-80" />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -142,7 +221,7 @@ export default function PokeCardPage() {
                 {/* Stats — bg-background (회색)으로만 구분 */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-background rounded-2xl p-4 flex flex-col items-center shadow-sm">
-                        <Heart className="size-5 text-foreground mb-1" fill="currentColor" />
+                        <span className="text-xl text-primary mb-1">♥</span>
                         <span className="text-2xl font-black text-foreground">{health}</span>
                         <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase mt-0.5">체력</span>
                     </div>
