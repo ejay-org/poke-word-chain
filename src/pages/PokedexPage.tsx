@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { Search, Heart, Camera, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import BottomNav from '@/components/BottomNav';
 import pokemonData from '@/data/pokemonData.json';
 
 interface Pokemon {
@@ -148,10 +147,6 @@ export default function PokedexPage() {
                 {/* Title */}
                 <div className="text-center">
                     <h1 className="text-lg font-black text-foreground tracking-tight">나의 포켓덱스</h1>
-                    <div className="flex items-center justify-center gap-1.5 mt-0.5">
-                        <span className="size-2 rounded-full bg-green-400 animate-pulse" />
-                        <span className="text-xs text-muted-foreground font-medium">Poke API Online</span>
-                    </div>
                 </div>
 
                 {/* Right button */}
@@ -218,8 +213,6 @@ export default function PokedexPage() {
             <button className="fixed bottom-20 right-5 w-12 h-12 rounded-full bg-primary shadow-lg flex items-center justify-center hover:scale-105 transition-transform active:scale-95 z-40">
                 <Camera className="size-5 text-white" />
             </button>
-
-            <BottomNav />
         </div>
     );
 }

@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, BookOpen, Puzzle } from 'lucide-react';
-import BottomNav from '@/components/BottomNav';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -82,8 +81,6 @@ export default function HomePage() {
                     </button>
                 </div>
             </div>
-
-            <BottomNav />
         </div>
     );
 }

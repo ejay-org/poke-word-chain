@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Info, Trophy, Clock, Lightbulb, PlayCircle, Eye } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Lightbulb, PlayCircle, Eye } from 'lucide-react';
 import ChatHistory from '@/components/ChatHistory';
 import InputArea from '@/components/InputArea';
-import BottomNav from '@/components/BottomNav';
 import { useGame } from '@/hooks/useGame';
 
 export default function GamePage() {
@@ -37,20 +36,10 @@ export default function GamePage() {
                 {/* Title */}
                 <div className="text-center">
                     <h1 className="text-lg font-black text-foreground tracking-tight">Word Chain</h1>
-                    <div className="flex items-center justify-center gap-1.5 mt-0.5">
-                        <span className="size-2 rounded-full bg-green-400 animate-pulse" />
-                        <span className="text-xs text-muted-foreground font-medium">PokeBot Online</span>
-                    </div>
                 </div>
 
-                {/* Info button */}
-                <button
-                    onClick={resetGame}
-                    title="Reset game"
-                    className="size-10 rounded-full bg-card border border-primary/15 shadow-sm flex items-center justify-center hover:bg-primary/5 active:scale-95 transition-all"
-                >
-                    <Info className="size-4 text-foreground" />
-                </button>
+                {/* Empty placeholder for alignment */}
+                <div className="size-10" />
             </header>
 
             {/* ── Chat area ── */}
@@ -108,10 +97,7 @@ export default function GamePage() {
             </main>
 
             {/* ── Bottom area ── */}
-            {status === 'idle' ? (
-                /* idle: 메인 메뉴와 동일한 하단 내비게이션 */
-                <BottomNav />
-            ) : (
+            {status !== 'idle' && (
                 /* playing/won/lost: 게임 전용 하단 바 */
                 <div className="flex-shrink-0 bg-background border-t border-primary/10">
                     {/* Input row */}
