@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Lightbulb, PlayCircle, Eye } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { ArrowLeft, Trophy, Clock, Lightbulb, PlayCircle, Eye, MessageSquareHeart } from 'lucide-react';
 import ChatHistory from '@/components/ChatHistory';
 import InputArea from '@/components/InputArea';
 import { useGame } from '@/hooks/useGame';
+import { useTTS } from '@/hooks/useTTS';
 
 export default function GamePage() {
     const navigate = useNavigate();
@@ -10,12 +12,40 @@ export default function GamePage() {
         messages,
         status,
         currentTurn,
+        gameMode,
         startGame,
         submitUserWord,
         giveHint,
         revealAnswer,
         resetGame,
     } = useGame();
+
+    const { speak, cancel } = useTTS();
+
+    // Track the last AI message id we've spoken to avoid re-speaking on re-renders
+    const lastSpokenId = useRef<string>('');
+
+    // Auto-speak AI messages in conversation mode
+    useEffect(() => {
+        if (gameMode !== 'conversation') return;
+        const lastAiMsg = [...messages].reverse().find((m) => m.sender === 'ai');
+        if (!lastAiMsg || lastAiMsg.id === lastSpokenId.current) return;
+        // Don't speak "thinking" placeholder
+        if (lastAiMsg.text.includes('고민 중')) return;
+
+        lastSpokenId.current = lastAiMsg.id;
+        // Speak pokemon name only (concise for word-chain game)
+        const textToSpeak = lastAiMsg.pokemonName ?? lastAiMsg.text;
+        speak(textToSpeak);
+    }, [messages, gameMode, speak]);
+
+    // Cancel TTS when game resets or mode changes
+    useEffect(() => {
+        if (status === 'idle') {
+            cancel();
+            lastSpokenId.current = '';
+        }
+    }, [status, cancel]);
 
     // Compute score from user messages
     const score = messages.filter(m => m.sender === 'user').length;
@@ -36,9 +66,15 @@ export default function GamePage() {
                 {/* Title */}
                 <div className="text-center">
                     <h1 className="text-lg font-black text-foreground tracking-tight">Word Chain</h1>
+                    {/* Mode badge */}
+                    {status !== 'idle' && (
+                        <span className="text-[10px] font-bold tracking-widest text-primary/60 uppercase">
+                            {gameMode === 'normal' ? '일반 모드' : gameMode === 'ai' ? 'AI 모드' : '대화 모드 🔊'}
+                        </span>
+                    )}
                 </div>
 
-                {/* Empty placeholder for alignment */}
+                {/* Empty placeholder */}
                 <div className="size-10" />
             </header>
 
@@ -67,19 +103,34 @@ export default function GamePage() {
                             </p>
 
                             <div className="flex flex-col gap-3">
+                                {/* AI Mode */}
                                 <button
                                     onClick={() => startGame('ai')}
                                     className="w-full py-4 rounded-full bg-primary text-white font-bold text-sm shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
                                     <PlayCircle className="size-4" />
-                                    AI 모드 시작 (페르소나)
+                                    AI 모드
+                                    <span className="text-white/70 font-normal text-xs">(페르소나 대사)</span>
                                 </button>
+
+                                {/* Conversation Mode */}
+                                <button
+                                    onClick={() => startGame('conversation')}
+                                    className="w-full py-4 rounded-full bg-primary/10 text-primary font-bold text-sm border border-primary/30 hover:bg-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <MessageSquareHeart className="size-4" />
+                                    대화 모드
+                                    <span className="text-primary/60 font-normal text-xs">(음성 출력 🔊)</span>
+                                </button>
+
+                                {/* Normal Mode */}
                                 <button
                                     onClick={() => startGame('normal')}
                                     className="w-full py-3.5 rounded-full bg-card text-foreground font-semibold text-sm border border-primary/20 hover:bg-primary/5 active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
                                     <PlayCircle className="size-4 text-primary" />
-                                    일반 모드 시작 (빠름)
+                                    일반 모드
+                                    <span className="text-muted-foreground font-normal text-xs">(빠름)</span>
                                 </button>
                             </div>
                         </div>
@@ -98,17 +149,17 @@ export default function GamePage() {
 
             {/* ── Bottom area ── */}
             {status !== 'idle' && (
-                /* playing/won/lost: 게임 전용 하단 바 */
                 <div className="flex-shrink-0 bg-background border-t border-primary/10">
                     {/* Input row */}
                     <div className="px-4 pt-3 pb-2">
                         <InputArea
                             onSubmit={submitUserWord}
                             disabled={status !== 'playing' || currentTurn !== 'user'}
+                            showVoice={gameMode === 'conversation'}
                         />
                     </div>
 
-                    {/* Bottom tab bar — SCORE / RECENT / HINT / 정답 */}
+                    {/* Bottom tab bar */}
                     <div
                         className="flex items-center justify-around px-4 pb-4 pt-1"
                         style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
@@ -126,13 +177,13 @@ export default function GamePage() {
                             </span>
                         </div>
 
-                        {/* Recent */}
+                        {/* Recent / Reset */}
                         <button
                             onClick={resetGame}
                             className="flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity active:scale-95"
                         >
                             <Clock className="size-5 text-muted-foreground" />
-                            <span className="text-[10px] font-bold text-muted-foreground tracking-wide uppercase">Recent</span>
+                            <span className="text-[10px] font-bold text-muted-foreground tracking-wide uppercase">Reset</span>
                         </button>
 
                         {/* Hint */}
