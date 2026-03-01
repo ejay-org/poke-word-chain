@@ -49,27 +49,26 @@
 - [ ] **Step 20**: **텍스트 기반 게임 완전 동작 확인 (AI 페르소나 포함)**
 
 ## Phase 4: 음성 인식 기능 추가 (STT)
-- [ ] **Step 21**: Groq API 계정 생성 및 API 키 발급
-- [ ] **Step 22**: 환경 변수 추가 (`VITE_GROQ_API_KEY`)
-- [ ] **Step 23**: Web MediaRecorder API를 활용한 음성 녹음 기능 구현
+- [x] **Step 21**: Groq API 계정 생성 및 API 키 발급
+- [x] **Step 22**: 환경 변수 추가 (`VITE_GROQ_API_KEY`)
+- [x] **Step 23**: Web MediaRecorder API를 활용한 음성 녹음 기능 구현
   - 마이크 버튼 UI 추가
   - 녹음 상태 표시 (녹음 중, 처리 중)
-- [ ] **Step 24**: Groq API 연동 및 실시간 STT 구현
+- [x] **Step 24**: Groq API 연동 및 실시간 STT 구현
   - Whisper 모델 사용
   - 오디오 파일 포맷 변환 (Blob → File)
   - 에러 핸들링
-- [ ] **Step 25**: 텍스트 입력과 음성 입력 통합
+- [x] **Step 25**: 텍스트 입력과 음성 입력 통합
   - 두 방식 모두 동일한 게임 로직 사용
   - 입력 모드 전환 UI
 
 ## Phase 5: 음성 출력 기능 추가 (TTS)
-- [ ] **Step 26**: Web Speech API를 활용한 TTS 음성 출력 구현
-  - 한국어 음성 설정
-  - 음성 재생 상태 관리
-- [ ] **Step 27**: AI 응답 텍스트를 음성으로 출력
+- [x] **Step 26**: Web Speech API(브라우저 내장)를 활용한 `useTTS` 훅 구현
+  - 한국어(`ko-KR`) 음성 설정
+  - 음성 재생 상태 관리(`isSpeaking`)
+- [x] **Step 27**: 대화 모드에서 AI 응답 텍스트 자동 음성 출력
   - LLM 응답 → TTS 자동 재생
-  - 음성 출력 on/off 토글
-- [ ] **Step 28**: 음성 재생 중 UI 피드백 (스피커 아이콘, 애니메이션)
+  - 대화 모드 전용 (일반/AI 모드에서는 미사용)
 
 ## Phase 6: UX 고도화 및 폴리싱
 - [ ] **Step 29**: 음성 인식 중 시각적 피드백 (로딩 애니메이션, 파형 효과)

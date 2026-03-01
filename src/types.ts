@@ -9,4 +9,5 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-export type GameMode = 'normal' | 'ai';
+export type GameMode = 'normal' | 'ai' | 'conversation';
+
