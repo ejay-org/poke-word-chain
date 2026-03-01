@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { ArrowLeft, Heart, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import pokemonData from '@/data/pokemonData.json';
+import { useLikedPokemon } from '@/hooks/useLikedPokemon';
 
 interface Pokemon {
     id: number;
@@ -44,6 +45,8 @@ export default function PokeCardPage() {
     const navigate = useNavigate();
     const allPokemon = pokemonData as Pokemon[];
     const pokemon = allPokemon.find((p) => p.id === Number(id));
+    const { toggleLike, isLiked } = useLikedPokemon();
+    const liked = pokemon ? isLiked(pokemon.id) : false;
 
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
     const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
@@ -146,8 +149,15 @@ export default function PokeCardPage() {
                     <ArrowLeft className="size-4 text-foreground" />
                 </button>
                 <h2 className="text-sm font-black tracking-widest uppercase text-foreground/70">Poké Card</h2>
-                <button className="w-9 h-9 rounded-full bg-background flex items-center justify-center hover:bg-primary/10 transition-colors active:scale-95">
-                    <Heart className="size-4 text-primary" />
+                <button
+                    onClick={() => pokemon && toggleLike(pokemon.id)}
+                    className="w-9 h-9 rounded-full bg-background flex items-center justify-center hover:bg-primary/10 transition-colors active:scale-95"
+                    aria-label={liked ? '좋아요 취소' : '좋아요'}
+                >
+                    <Heart
+                        className="size-4 text-primary transition-all duration-200"
+                        fill={liked ? 'currentColor' : 'none'}
+                    />
                 </button>
             </div>
 

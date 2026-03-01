@@ -3,6 +3,7 @@ import { Search, Heart, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import pokemonData from '@/data/pokemonData.json';
+import { useLikedPokemon } from '@/hooks/useLikedPokemon';
 
 interface Pokemon {
     id: number;
@@ -111,12 +112,16 @@ function PokemonGridCard({ pokemon, onClick }: { pokemon: Pokemon; onClick: () =
 export default function PokedexPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
+    const [showLiked, setShowLiked] = useState(false);
     const navigate = useNavigate();
+    const { isLiked } = useLikedPokemon();
 
     const allPokemon = pokemonData as Pokemon[];
 
     const filtered = useMemo(() => {
         return allPokemon.filter((p) => {
+            if (showLiked && !isLiked(p.id)) return false;
+
             const matchSearch =
                 !searchTerm.trim() ||
                 p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,7 +134,7 @@ export default function PokedexPage() {
 
             return matchSearch && matchType;
         });
-    }, [searchTerm, activeFilter, allPokemon]);
+    }, [searchTerm, activeFilter, allPokemon, showLiked, isLiked]);
 
     return (
         <div className="min-h-screen bg-background flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -146,12 +151,21 @@ export default function PokedexPage() {
 
                 {/* Title */}
                 <div className="text-center">
-                    <h1 className="text-lg font-black text-foreground tracking-tight">나의 포켓덱스</h1>
+                    <h1 className="text-lg font-black text-foreground tracking-tight">
+                        {showLiked ? '좋아요 목록' : '나의 포켓덱스'}
+                    </h1>
                 </div>
 
-                {/* Right button */}
-                <button className="size-10 rounded-full bg-card border border-primary/15 shadow-sm flex items-center justify-center hover:bg-primary/5 active:scale-95 transition-all">
-                    <Heart className="size-4 text-primary" />
+                {/* Right button: toggle liked view */}
+                <button
+                    onClick={() => setShowLiked((v) => !v)}
+                    className="size-10 rounded-full bg-card border border-primary/15 shadow-sm flex items-center justify-center hover:bg-primary/5 active:scale-95 transition-all"
+                    aria-label={showLiked ? '전체 보기' : '좋아요 목록 보기'}
+                >
+                    <Heart
+                        className="size-4 text-primary transition-all duration-200"
+                        fill={showLiked ? 'currentColor' : 'none'}
+                    />
                 </button>
             </header>
 
@@ -202,9 +216,19 @@ export default function PokedexPage() {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="text-6xl mb-4 opacity-30">❓</div>
-                        <p className="font-bold text-foreground/60">포켓몬을 찾을 수 없습니다</p>
-                        <p className="text-sm text-muted-foreground mt-1">이름을 다시 확인해주세요!</p>
+                        {showLiked ? (
+                            <>
+                                <div className="text-6xl mb-4 opacity-30">🤍</div>
+                                <p className="font-bold text-foreground/60">좋아요한 포켓몬이 없습니다</p>
+                                <p className="text-sm text-muted-foreground mt-1">포켓몬 카드의 ♡를 눌러보세요!</p>
+                            </>
+                        ) : (
+                            <>
+                                <div className="text-6xl mb-4 opacity-30">❓</div>
+                                <p className="font-bold text-foreground/60">포켓몬을 찾을 수 없습니다</p>
+                                <p className="text-sm text-muted-foreground mt-1">이름을 다시 확인해주세요!</p>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
