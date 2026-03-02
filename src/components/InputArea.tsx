@@ -65,14 +65,14 @@ export default function InputArea({ onSubmit, disabled = false, showVoice = fals
               onClick={startRecording}
               disabled={disabled || isProcessing}
               title={isRecording ? '녹음 중지' : '음성으로 입력'}
-              className="px-3 flex-shrink-0 transition-colors disabled:opacity-30"
+              className="px-3 flex-shrink-0 transition-colors disabled:opacity-30 hover:opacity-80"
             >
               {isProcessing ? (
-                <Loader2 className="size-4 text-primary animate-spin" />
+                <Loader2 className="size-5 text-primary animate-spin" />
               ) : isRecording ? (
-                <MicOff className="size-4 text-red-500 animate-pulse" />
+                <MicOff className="size-5 text-red-500 animate-pulse" />
               ) : (
-                <Mic className="size-4 text-muted-foreground/50 hover:text-primary" />
+                <Mic className="size-5 text-primary/70" />
               )}
             </button>
           )}

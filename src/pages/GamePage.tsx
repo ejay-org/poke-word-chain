@@ -120,7 +120,7 @@ export default function GamePage() {
                                 >
                                     <MessageSquareHeart className="size-4" />
                                     대화 모드
-                                    <span className="text-primary/60 font-normal text-xs">(음성 출력 🔊)</span>
+                                    <span className="text-primary/60 font-normal text-xs">(🎤 음성 입력 · 🔊 음성 출력)</span>
                                 </button>
 
                                 {/* Normal Mode */}
