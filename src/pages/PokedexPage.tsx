@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Search, Heart, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import pokemonData from '@/data/pokemonData.json';
 import { useLikedPokemon } from '@/hooks/useLikedPokemon';
+import { useCaughtPokemon } from '@/hooks/useCaughtPokemon';
 
 interface Pokemon {
     id: number;
@@ -76,12 +77,26 @@ function TypeBadge({ type }: { type: string }) {
     );
 }
 
-function PokemonGridCard({ pokemon, onClick }: { pokemon: Pokemon; onClick: () => void }) {
+function PokemonGridCard({
+    pokemon,
+    onClick,
+    caught,
+}: {
+    pokemon: Pokemon;
+    onClick: () => void;
+    caught?: boolean;
+}) {
     return (
         <button
             onClick={onClick}
-            className="bg-card rounded-3xl p-3 flex flex-col items-center gap-2 shadow-sm border border-primary/5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 active:scale-95 text-left w-full"
+            className="bg-card rounded-3xl p-3 flex flex-col items-center gap-2 shadow-sm border border-primary/5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 active:scale-95 text-left w-full relative"
         >
+            {/* Caught badge */}
+            {caught && (
+                <span className="absolute top-2 right-2 text-sm leading-none" title="잡은 포켓몬">
+                    🔴
+                </span>
+            )}
             {/* Image area */}
             <div className="w-full aspect-square rounded-2xl bg-gradient-to-b from-[#e8f8f5] to-[#d4efeb] flex items-center justify-center overflow-hidden">
                 <img
@@ -109,18 +124,25 @@ function PokemonGridCard({ pokemon, onClick }: { pokemon: Pokemon; onClick: () =
     );
 }
 
+type ViewMode = 'all' | 'liked' | 'caught';
+
 export default function PokedexPage() {
+    const location = useLocation();
+    const initialView: ViewMode = (location.state as { view?: ViewMode } | null)?.view ?? 'all';
+
     const [searchTerm, setSearchTerm] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
-    const [showLiked, setShowLiked] = useState(false);
+    const [viewMode, setViewMode] = useState<ViewMode>(initialView);
     const navigate = useNavigate();
     const { isLiked } = useLikedPokemon();
+    const { caughtIds, isCaught } = useCaughtPokemon();
 
     const allPokemon = pokemonData as Pokemon[];
 
     const filtered = useMemo(() => {
         return allPokemon.filter((p) => {
-            if (showLiked && !isLiked(p.id)) return false;
+            if (viewMode === 'liked' && !isLiked(p.id)) return false;
+            if (viewMode === 'caught' && !isCaught(p.id)) return false;
 
             const matchSearch =
                 !searchTerm.trim() ||
@@ -134,7 +156,13 @@ export default function PokedexPage() {
 
             return matchSearch && matchType;
         });
-    }, [searchTerm, activeFilter, allPokemon, showLiked, isLiked]);
+    }, [searchTerm, activeFilter, allPokemon, viewMode, isLiked, isCaught]);
+
+    const headerTitle = () => {
+        if (viewMode === 'liked') return '좋아요 목록';
+        if (viewMode === 'caught') return `잡은 포켓몬 (${caughtIds.length}/${allPokemon.length})`;
+        return '나의 포켓덱스';
+    };
 
     return (
         <div className="min-h-screen bg-background flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -152,21 +180,32 @@ export default function PokedexPage() {
                 {/* Title */}
                 <div className="text-center">
                     <h1 className="text-lg font-black text-foreground tracking-tight">
-                        {showLiked ? '좋아요 목록' : '나의 포켓덱스'}
+                        {headerTitle()}
                     </h1>
                 </div>
 
-                {/* Right button: toggle liked view */}
-                <button
-                    onClick={() => setShowLiked((v) => !v)}
-                    className="size-10 rounded-full bg-card border border-primary/15 shadow-sm flex items-center justify-center hover:bg-primary/5 active:scale-95 transition-all"
-                    aria-label={showLiked ? '전체 보기' : '좋아요 목록 보기'}
-                >
-                    <Heart
-                        className="size-4 text-primary transition-all duration-200"
-                        fill={showLiked ? 'currentColor' : 'none'}
-                    />
-                </button>
+                {/* Right buttons: Pokéball + Heart */}
+                <div className="flex items-center gap-1">
+                    {/* Caught toggle */}
+                    <button
+                        onClick={() => setViewMode((v) => v === 'caught' ? 'all' : 'caught')}
+                        className={`size-9 rounded-full border shadow-sm flex items-center justify-center active:scale-95 transition-all ${viewMode === 'caught' ? 'bg-primary/15 border-primary/40' : 'bg-card border-primary/15 hover:bg-primary/5'}`}
+                        aria-label={viewMode === 'caught' ? '전체 보기' : '잡은 포켓몬 보기'}
+                    >
+                        <span className="text-sm leading-none">🔴</span>
+                    </button>
+                    {/* Liked toggle */}
+                    <button
+                        onClick={() => setViewMode((v) => v === 'liked' ? 'all' : 'liked')}
+                        className={`size-9 rounded-full border shadow-sm flex items-center justify-center active:scale-95 transition-all ${viewMode === 'liked' ? 'bg-primary/15 border-primary/40' : 'bg-card border-primary/15 hover:bg-primary/5'}`}
+                        aria-label={viewMode === 'liked' ? '전체 보기' : '좋아요 목록 보기'}
+                    >
+                        <Heart
+                            className="size-4 text-primary transition-all duration-200"
+                            fill={viewMode === 'liked' ? 'currentColor' : 'none'}
+                        />
+                    </button>
+                </div>
             </header>
 
             <div className="bg-background px-5 pb-0">
@@ -211,16 +250,23 @@ export default function PokedexPage() {
                                 key={pokemon.id}
                                 pokemon={pokemon}
                                 onClick={() => navigate(`/pokecard/${pokemon.id}`)}
+                                caught={viewMode === 'all' && isCaught(pokemon.id)}
                             />
                         ))}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        {showLiked ? (
+                        {viewMode === 'liked' ? (
                             <>
                                 <div className="text-6xl mb-4 opacity-30">🤍</div>
                                 <p className="font-bold text-foreground/60">좋아요한 포켓몬이 없습니다</p>
                                 <p className="text-sm text-muted-foreground mt-1">포켓몬 카드의 ♡를 눌러보세요!</p>
+                            </>
+                        ) : viewMode === 'caught' ? (
+                            <>
+                                <div className="text-6xl mb-4 opacity-30">🔴</div>
+                                <p className="font-bold text-foreground/60">아직 잡은 포켓몬이 없습니다</p>
+                                <p className="text-sm text-muted-foreground mt-1">Word Chain 게임에서 포켓몬을 잡아보세요!</p>
                             </>
                         ) : (
                             <>
