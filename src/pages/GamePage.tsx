@@ -1,13 +1,75 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
-import { ArrowLeft, Trophy, Clock, Lightbulb, PlayCircle, Eye, MessageSquareHeart } from 'lucide-react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { ArrowLeft, Trophy, Clock, Lightbulb, PlayCircle, Eye, MessageSquareHeart, BookOpen } from 'lucide-react';
 import ChatHistory from '@/components/ChatHistory';
 import InputArea from '@/components/InputArea';
+import CelebrationOverlay from '@/components/CelebrationOverlay';
 import { useGame } from '@/hooks/useGame';
 import { useTTS } from '@/hooks/useTTS';
+import { useCaughtPokemon } from '@/hooks/useCaughtPokemon';
+import pokemonData from '@/data/pokemonData.json';
+
+interface PokemonData {
+    id: number;
+    types: string[];
+}
+
+const allPokemon = pokemonData as PokemonData[];
+
+// Map from type name (Korean) to all pokemon IDs of that type
+const typeToIds = new Map<string, number[]>();
+for (const p of allPokemon) {
+    for (const t of p.types) {
+        if (!typeToIds.has(t)) typeToIds.set(t, []);
+        typeToIds.get(t)!.push(p.id);
+    }
+}
+
+interface Celebration {
+    message: string;
+    subMessage?: string;
+}
 
 export default function GamePage() {
     const navigate = useNavigate();
+    const { caughtIds, addCaught, isCaught } = useCaughtPokemon();
+    const [celebration, setCelebration] = useState<Celebration | null>(null);
+
+    const handlePokemonCaught = useCallback((id: number) => {
+        const alreadyCaught = isCaught(id);
+        addCaught(id);
+
+        if (alreadyCaught) return;
+
+        // Build the updated caught set (including this new id)
+        const newCaughtSet = new Set([...caughtIds, id]);
+
+        // Check if all Pokémon are caught
+        if (newCaughtSet.size >= allPokemon.length) {
+            setCelebration({
+                message: '모든 포켓몬을 잡았습니다!',
+                subMessage: `총 ${allPokemon.length}마리 완성 🎊`,
+            });
+            return;
+        }
+
+        // Check if all pokemon of any type are now caught
+        const caughtPokemon = allPokemon.find((p) => p.id === id);
+        if (!caughtPokemon) return;
+
+        for (const type of caughtPokemon.types) {
+            const idsOfType = typeToIds.get(type) ?? [];
+            const allOfTypeCaught = idsOfType.every((tid) => newCaughtSet.has(tid));
+            if (allOfTypeCaught) {
+                setCelebration({
+                    message: `${type} 타입 포켓몬을 모두 잡았습니다!`,
+                    subMessage: `${type} 타입 ${idsOfType.length}마리 완성 ✨`,
+                });
+                return;
+            }
+        }
+    }, [caughtIds, addCaught, isCaught]);
+
     const {
         messages,
         status,
@@ -18,7 +80,7 @@ export default function GamePage() {
         giveHint,
         revealAnswer,
         resetGame,
-    } = useGame();
+    } = useGame(handlePokemonCaught);
 
     const { speak, cancel } = useTTS();
 
@@ -74,8 +136,15 @@ export default function GamePage() {
                     )}
                 </div>
 
-                {/* Empty placeholder */}
-                <div className="size-10" />
+                {/* Caught counter */}
+                <button
+                    onClick={() => navigate('/pokedex', { state: { view: 'caught' } })}
+                    className="size-10 rounded-full bg-card border border-primary/15 shadow-sm flex flex-col items-center justify-center hover:bg-primary/5 active:scale-95 transition-all"
+                    title="잡은 포켓몬 보기"
+                >
+                    <span className="text-base leading-none">🔴</span>
+                    <span className="text-[8px] font-black text-primary leading-none mt-0.5">{caughtIds.length}</span>
+                </button>
             </header>
 
             {/* ── Chat area ── */}
@@ -205,8 +274,26 @@ export default function GamePage() {
                             <Eye className="size-5 text-foreground/60" />
                             <span className="text-[10px] font-bold text-foreground/60 tracking-wide uppercase">정답</span>
                         </button>
+
+                        {/* 도감 */}
+                        <button
+                            onClick={() => navigate('/pokedex', { state: { view: 'caught' } })}
+                            className="flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity active:scale-95"
+                        >
+                            <BookOpen className="size-5 text-primary/70" />
+                            <span className="text-[10px] font-bold text-primary/70 tracking-wide uppercase">도감</span>
+                        </button>
                     </div>
                 </div>
+            )}
+
+            {/* ── Celebration overlay ── */}
+            {celebration && (
+                <CelebrationOverlay
+                    message={celebration.message}
+                    subMessage={celebration.subMessage}
+                    onDismiss={() => setCelebration(null)}
+                />
             )}
         </div>
     );

@@ -21,7 +21,7 @@ interface UseGameReturn {
     updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
 }
 
-export function useGame(): UseGameReturn {
+export function useGame(onPokemonCaught?: (id: number) => void): UseGameReturn {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [status, setStatus] = useState<GameStatus>('idle');
     const [currentTurn, setCurrentTurn] = useState<Turn>('user');
@@ -106,6 +106,7 @@ export function useGame(): UseGameReturn {
         const validWord = validation.pokemon!.name;
         const validImage = validation.pokemon!.imageUrl;
         addMessage('user', validWord, { pokemonName: validWord, pokemonImageUrl: validImage });
+        onPokemonCaught?.(validation.pokemon!.id);
 
         // Update State
         const newUsedWords = new Set(usedWords);
