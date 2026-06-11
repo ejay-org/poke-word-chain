@@ -13,9 +13,9 @@ import { getSafeRandomPokemon, hasValidSuccessor, Pokemon } from './gameLogic';
 
 vi.mock('@/data/pokemonData.json', () => ({
     default: [
-        { id: 1, name: '시작이좋아', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '' }, // Ends in 아 -> Successor needed
-        { id: 2, name: '아보', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '' }, // Starts with 아
-        { id: 3, name: '끝말이없어', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '' }, // Ends in 어 -> No successor
+        { id: 1, name: '시작이좋아', nameEn: 'GoodStart', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '', evolvesFromId: null, evolvesToIds: [] }, // Ends in 아 -> Successor needed
+        { id: 2, name: '아보', nameEn: 'Abra', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '', evolvesFromId: null, evolvesToIds: [] }, // Starts with 아
+        { id: 3, name: '끝말이없어', nameEn: 'NoSuccessor', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '', evolvesFromId: null, evolvesToIds: [] }, // Ends in 어 -> No successor
     ]
 }));
 
@@ -23,13 +23,13 @@ describe('Safe Start Logic', () => {
     it('hasValidSuccessor returns true for pokemon with successors', () => {
         // Based on the mock above:
         // '시작이좋아' -> Ends in '아'. '아보' exists. Should be true.
-        const goodStart: Pokemon = { id: 1, name: '시작이좋아', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '' };
+        const goodStart: Pokemon = { id: 1, name: '시작이좋아', nameEn: 'GoodStart', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '', evolvesFromId: null, evolvesToIds: [] };
         expect(hasValidSuccessor(goodStart)).toBe(true);
     });
 
     it('hasValidSuccessor returns false for pokemon without successors', () => {
         // '끝말이없어' -> Ends in '어'. No pokemon starts with '어'. Should be false.
-        const badStart: Pokemon = { id: 3, name: '끝말이없어', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '' };
+        const badStart: Pokemon = { id: 3, name: '끝말이없어', nameEn: 'NoSuccessor', generation: 1, types: [], typesEn: [], abilities: [], description: '', imageUrl: '', evolvesFromId: null, evolvesToIds: [] };
         expect(hasValidSuccessor(badStart)).toBe(false);
     });
 
