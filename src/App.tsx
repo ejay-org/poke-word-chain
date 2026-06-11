@@ -3,6 +3,7 @@ import HomePage from '@/pages/HomePage';
 import GamePage from '@/pages/GamePage';
 import PokedexPage from '@/pages/PokedexPage';
 import PokeCardPage from '@/pages/PokeCardPage';
+import QuizPage from '@/pages/QuizPage';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/game" element={<GamePage />} />
+        <Route path="/quiz" element={<QuizPage />} />
         <Route path="/pokedex" element={<PokedexPage />} />
         <Route path="/pokecard/:id" element={<PokeCardPage />} />
       </Routes>

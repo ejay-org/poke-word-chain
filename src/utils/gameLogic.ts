@@ -4,12 +4,15 @@ import pokemonDataRaw from '../data/pokemonData.json';
 export interface Pokemon {
   id: number;
   name: string;
+  nameEn: string;
   generation: number;
   types: string[];
   typesEn: string[];
   abilities: string[];
   description: string;
   imageUrl: string;
+  evolvesFromId: number | null;
+  evolvesToIds: number[];
 }
 
 const pokemonData = pokemonDataRaw as Pokemon[];
