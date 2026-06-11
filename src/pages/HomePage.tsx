@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, BookOpen, Puzzle } from 'lucide-react';
+import { ChevronRight, BookOpen, Puzzle, HelpCircle } from 'lucide-react';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -75,6 +75,25 @@ export default function HomePage() {
                             <div className="flex-1 text-left">
                                 <p className="text-xl font-bold text-foreground">Word Chain</p>
                                 <p className="text-xs font-bold text-muted-foreground tracking-widest uppercase mt-0.5">Game Time</p>
+                            </div>
+                            <ChevronRight className="size-5 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                    </button>
+
+                    {/* Pokemon Quiz Card */}
+                    <button
+                        onClick={() => navigate('/quiz')}
+                        className="group bg-card rounded-3xl p-1 shadow-[0_8px_0_rgba(255,166,158,0.3)] active:shadow-[0_2px_0_rgba(255,166,158,0.3)] active:translate-y-[6px] transition-all duration-150 w-full border border-primary/20"
+                    >
+                        <div className="bg-card rounded-[1.4rem] px-5 py-0 flex items-center gap-4 h-24">
+                            {/* Icon circle */}
+                            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center flex-shrink-0 shadow-md">
+                                <HelpCircle className="size-6 text-card" strokeWidth={1.5} />
+                            </div>
+                            {/* Text */}
+                            <div className="flex-1 text-left">
+                                <p className="text-xl font-bold text-foreground">Pokemon Quiz</p>
+                                <p className="text-xs font-bold text-muted-foreground tracking-widest uppercase mt-0.5">Guess 'em!</p>
                             </div>
                             <ChevronRight className="size-5 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                         </div>
